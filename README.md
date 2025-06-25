@@ -1,6 +1,14 @@
-# FTB Backups [![](http://cf.way2muchnoise.eu/314904.svg)  ![](http://cf.way2muchnoise.eu/versions/314904.svg)](https://www.curseforge.com/minecraft/mc-mods/ftb-backups-forge)
+# FTB Backups 3
 
-Use https://github.com/FTBTeam/FTB-Mods-Issues for any mod issues
+Our simple but powerful backups solution for Minecraft 1.21.1+!
+
+## Features
+
+*   In-game progress display of backups (configurable to just admins, all players, or not at all)
+*   Command triggered backups
+*   Simple, user friendly time config for specify how often to backup
+*   Plugin system built-in for developers to add alternative backup methods (ZIP by default)
+
 
 ## Support
 
