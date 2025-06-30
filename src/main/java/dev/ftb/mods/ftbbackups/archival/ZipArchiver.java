@@ -1,5 +1,6 @@
 package dev.ftb.mods.ftbbackups.archival;
 
+import dev.ftb.mods.ftbbackups.Backups;
 import dev.ftb.mods.ftbbackups.FTBBackups;
 import dev.ftb.mods.ftbbackups.config.FTBBackupsServerConfig;
 import dev.ftb.mods.ftbbackups.api.IArchivalPlugin;
@@ -51,7 +52,7 @@ public enum ZipArchiver implements IArchivalPlugin {
                 zos.closeEntry();
                 fis.close();
             } catch (IOException ex) {
-                throw new IOException(String.format("Failed to add file %s to ZIP archive: %s", archiveEntry, ex));
+                context.logger().error("Couldn't add {} to ZIP archive: {}", archiveEntry, ex);
             }
         }
 
