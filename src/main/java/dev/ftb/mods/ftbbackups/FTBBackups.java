@@ -8,6 +8,7 @@ import dev.ftb.mods.ftbbackups.client.BackupsClient;
 import dev.ftb.mods.ftbbackups.config.FTBBackupsClientConfig;
 import dev.ftb.mods.ftbbackups.config.FTBBackupsServerConfig;
 import dev.ftb.mods.ftbbackups.net.FTBBackupsNetHandler;
+import dev.ftb.mods.ftbbackups.net.NotifyDisabledPacket;
 import dev.ftb.mods.ftblibrary.config.manager.ConfigManager;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -15,7 +16,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
-import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.fml.loading.FMLEnvironment;
@@ -26,6 +26,7 @@ import net.neoforged.neoforge.event.server.ServerAboutToStartEvent;
 import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 import net.neoforged.neoforge.event.server.ServerStoppingEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
+import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 import org.slf4j.LoggerFactory;
@@ -34,16 +35,17 @@ import org.slf4j.LoggerFactory;
 public class FTBBackups {
     public static final String MOD_ID = "ftbbackups3";
 
-    public FTBBackups(IEventBus eventBus, ModContainer container) {
-        if (isDisabledByEnvironmentVar()) {
-            LoggerFactory.getLogger(MOD_ID).info("FTB Backups 3 is disabled by environment variable! (FTB_BACKUPS_DISABLED is set)");
-            return;
-        }
-
+    public FTBBackups(IEventBus eventBus) {
         if (FMLEnvironment.dist == Dist.CLIENT) {
             eventBus.<FMLClientSetupEvent>addListener(event -> BackupsClient.onModConstruction());
         }
         eventBus.addListener(this::registerNetwork);
+        NeoForge.EVENT_BUS.addListener(EventPriority.HIGH, this::playerLoggedIn);
+
+        if (isDisabledByEnvironmentVar()) {
+            LoggerFactory.getLogger(MOD_ID).info("FTB Backups 3 is disabled by environment variable! (FTB_BACKUPS_DISABLED is set)");
+            return;
+        }
 
         ConfigManager.getInstance().registerServerConfig(FTBBackupsServerConfig.CONFIG, MOD_ID + ".general",
                 true, FTBBackupsServerConfig::onConfigChanged);
@@ -87,6 +89,13 @@ public class FTBBackups {
     private void registerArchivalPlugins(RegisterArchivalPluginEvent event) {
         event.register(FileCopyArchiver.INSTANCE);
         event.register(ZipArchiver.INSTANCE);
+    }
+
+    public void playerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
+        if (event.getEntity() instanceof ServerPlayer sp && isDisabledByEnvironmentVar()) {
+            // note: client disabled flag is reset in BackupsClient#onClientDisconnected
+            PacketDistributor.sendToPlayer(sp, new NotifyDisabledPacket(true));
+        }
     }
 
     public void playerLoggedOut(PlayerEvent.PlayerLoggedOutEvent event) {

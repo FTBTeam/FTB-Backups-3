@@ -22,10 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.nio.file.FileVisitResult;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.SimpleFileVisitor;
+import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -278,7 +275,9 @@ public class Backups {
                         if (file.isAbsolute()) {
                             LOGGER.error("ignoring absolute file {} in extras!", file);
                         } else {
-                            res.put(file.toRealPath(), file.toString());
+                            if (notExcludedByConfig(file)) {
+                                res.put(file.toRealPath(), file.toString());
+                            }
                         }
                         return FileVisitResult.CONTINUE;
                     }
@@ -297,7 +296,7 @@ public class Backups {
         Files.walkFileTree(server.getWorldPath(LevelResource.ROOT).toAbsolutePath(), new SimpleFileVisitor<>() {
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-                if (!file.endsWith("session.lock") && Files.isReadable(file)) {
+                if (Files.isReadable(file) && notExcludedByConfig(file)) {
                     res.put(file.toRealPath(), instanceDir.relativize(file).toString());
                 }
                 return FileVisitResult.CONTINUE;
@@ -305,6 +304,10 @@ public class Backups {
         });
 
         return res;
+    }
+
+    private static boolean notExcludedByConfig(Path file) {
+        return FTBBackupsServerConfig.EXCLUSION_MATCHERS.get().stream().noneMatch(m -> m.matches(file.getFileName()));
     }
 
     /**
