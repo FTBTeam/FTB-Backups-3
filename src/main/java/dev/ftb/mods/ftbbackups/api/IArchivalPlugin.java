@@ -32,11 +32,11 @@ public interface IArchivalPlugin {
     }
 
     /**
-     * Called when actually creating the archive file
+     * Called when actually creating the archive file.
      *
      * @param context the archival context
-     * @return the nominal size of the archived, in bytes
-     * @throws Exception thrown if anything goes wrong
+     * @return the nominal size of the archive, in bytes
+     * @throws Exception thrown if something goes fatally wrong, i.e. the entire backup process should be aborted
      */
     @ApiStatus.OverrideOnly
     long createArchive(ArchivalContext context) throws Exception;

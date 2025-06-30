@@ -10,9 +10,12 @@ import net.minecraft.resources.ResourceLocation;
 import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.common.util.Lazy;
 
+import java.nio.file.FileSystems;
 import java.nio.file.Path;
+import java.nio.file.PathMatcher;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.List;
 
 public interface FTBBackupsServerConfig {
     String KEY = FTBBackups.MOD_ID + "-server";
@@ -82,6 +85,8 @@ public interface FTBBackupsServerConfig {
                     "Builtin methods are \"ftbbackups:zip\" (create a ZIP file) and \"ftbbackups:filecopy\" (simple recursive copy of files with no compression)",
                     "More archival plugins may be added by other mods.");
 
+    StringListValue EXCLUDED_FILES = CONFIG.addStringList("excluded_files", List.of("glob:*.neoforge-tmp", "glob:session.lock"));
+
     BooleanValue NOTIFY_ADMINS_ONLY = CONFIG.addBoolean("notify_admins_only", false)
             .comment("If true, only player with permission level >= 2 (or SSP integrated server owners) will be notified on-screen about backup progress");
 
@@ -116,6 +121,7 @@ public interface FTBBackupsServerConfig {
 
     static void onConfigChanged(boolean ignoredIsServer) {
         MAX_TOTAL_SIZE.invalidate();
+        EXCLUSION_MATCHERS.invalidate();
     }
 
     static ResourceLocation archivalPlugin() {
@@ -133,4 +139,8 @@ public interface FTBBackupsServerConfig {
                 FMLPaths.GAMEDIR.get().resolve(DEFAULT_BACKUP_FOLDER) :
                 Paths.get(folder);
     }
+
+    Lazy<List<PathMatcher>> EXCLUSION_MATCHERS = Lazy.of(() ->
+            FTBBackupsServerConfig.EXCLUDED_FILES.get().stream()
+                    .map(f -> FileSystems.getDefault().getPathMatcher(f)).toList());
 }
