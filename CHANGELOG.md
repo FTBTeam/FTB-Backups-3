@@ -4,20 +4,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [21.1.4]
+## [21.1.3]
 
 ### Added
 * Added "excluded_files" server config setting to specify files which should be in the backup archive
-  * Use the standard Java PathMatcher system; entries should be either "glob:<file-glob>" or "regex:<regular-expression>" 
+  * Use the standard Java PathMatcher system; entries should be either "glob:<file-glob>" or "regex:<regular-expression>"
   * By default, includes "glob:session.lock" and "glob:*.neoforge-tmp"
 
 ### Fixed
-* The ZIP archiver no longer aborts if any file can't be included (now just logs an error and continues)
-
-## [21.1.3]
-
-### Fixed
 * Allow clients to connect to server if mod is disabled (FTB_BACKUPS_DISABLED) on server but not client
+* The ZIP archiver no longer aborts if any file can't be included (now just logs an error and continues)
 
 ## [21.1.2]
 
