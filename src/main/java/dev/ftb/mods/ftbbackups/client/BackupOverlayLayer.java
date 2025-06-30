@@ -20,7 +20,7 @@ public class BackupOverlayLayer implements LayeredDraw.Layer {
 
     @Override
     public void render(GuiGraphics guiGraphics, DeltaTracker deltaTracker) {
-        if (!FTBBackupsClientConfig.SHOW_OVERLAY.get()) {
+        if (!FTBBackupsClientConfig.SHOW_OVERLAY.get() || BackupsClient.isDisabledOnThisServer()) {
             return;
         }
 

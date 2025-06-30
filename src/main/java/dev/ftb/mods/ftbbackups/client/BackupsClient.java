@@ -2,6 +2,7 @@ package dev.ftb.mods.ftbbackups.client;
 
 import dev.ftb.mods.ftbbackups.Backups;
 import dev.ftb.mods.ftbbackups.FTBBackups;
+import dev.ftb.mods.ftblibrary.sidebar.SidebarButtonManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
@@ -23,6 +24,7 @@ public class BackupsClient {
     private static BackupProgress backupProgress = BackupProgress.NONE;
 
     private static int progressTicker = 0;
+    private static boolean disabledOnServer = false;
 
     public static void onModConstruction() {
         NeoForge.EVENT_BUS.addListener(BackupsClient::onClientDisconnected);
@@ -68,6 +70,7 @@ public class BackupsClient {
 
     private static void onClientDisconnected(ClientPlayerNetworkEvent.LoggingOut ignoredEvent) {
         backupProgress = BackupProgress.NONE;
+        setDisabledOnThisServer(false);
     }
 
     public static @NotNull MutableComponent progressMessage() {
@@ -76,6 +79,15 @@ public class BackupsClient {
 
     public static BackupProgress getBackupProgress() {
         return backupProgress;
+    }
+
+    public static void setDisabledOnThisServer(boolean disabled) {
+        disabledOnServer = disabled;
+        SidebarButtonManager.INSTANCE.getButton(FTBBackups.id("config")).ifPresent(btn -> btn.setForceHidden(disabled));
+    }
+
+    public static boolean isDisabledOnThisServer() {
+        return disabledOnServer;
     }
 
     public record BackupProgress(int current, int total) {
