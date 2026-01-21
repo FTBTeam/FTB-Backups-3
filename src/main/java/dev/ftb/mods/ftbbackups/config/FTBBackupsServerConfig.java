@@ -5,8 +5,8 @@ import dev.ftb.mods.ftbbackups.BackupUtils;
 import dev.ftb.mods.ftbbackups.Backups;
 import dev.ftb.mods.ftbbackups.FTBBackups;
 import dev.ftb.mods.ftbbackups.archival.ZipArchiver;
-import dev.ftb.mods.ftblibrary.snbt.config.*;
-import net.minecraft.resources.ResourceLocation;
+import dev.ftb.mods.ftblibrary.config.value.*;
+import net.minecraft.resources.Identifier;
 import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.common.util.Lazy;
 
@@ -19,7 +19,7 @@ import java.util.List;
 
 public interface FTBBackupsServerConfig {
     String KEY = FTBBackups.MOD_ID + "-server";
-    SNBTConfig CONFIG = SNBTConfig.create(KEY)
+    Config CONFIG = Config.create(KEY)
             .comment("Server-specific configuration for FTB Backups 3",
                     "Modpack defaults should be defined in <instance>/config/" + KEY + ".snbt",
                     "  (may be overwritten on modpack update)",
@@ -77,10 +77,10 @@ public interface FTBBackupsServerConfig {
     BooleanValue FORCE_ON_SHUTDOWN = CONFIG.addBoolean("force_on_shutdown", false)
             .comment("Create a backup when server is stopped.");
 
-    SNBTConfig ADVANCED = CONFIG.addGroup("advanced")
+    Config ADVANCED = CONFIG.addGroup("advanced")
             .comment("Advanced features that shouldn't be changed unless you know what you are doing.");
 
-    ArchivalPluginValue ARCHIVAL_PLUGIN = CONFIG.add(new ArchivalPluginValue(CONFIG, "archival_plugin", ZipArchiver.ID))
+    ArchivalPluginValue ARCHIVAL_PLUGIN = CONFIG.add(new ArchivalPluginValue(CONFIG, "archival_plugin", ZipArchiver.ID.toString()))
             .comment("Method to use to create a backup archive.",
                     "Builtin methods are \"ftbbackups:zip\" (create a ZIP file) and \"ftbbackups:filecopy\" (simple recursive copy of files with no compression)",
                     "More archival plugins may be added by other mods.");
@@ -124,8 +124,8 @@ public interface FTBBackupsServerConfig {
         EXCLUSION_MATCHERS.invalidate();
     }
 
-    static ResourceLocation archivalPlugin() {
-        ResourceLocation rl = ARCHIVAL_PLUGIN.get();
+    static Identifier archivalPlugin() {
+        Identifier rl = Identifier.tryParse(ARCHIVAL_PLUGIN.get());
         if (rl == null) {
             Backups.LOGGER.error("Invalid archive plugin id {}, defaulting to ftbbackups:zip!", ARCHIVAL_PLUGIN.get());
             return ZipArchiver.ID;

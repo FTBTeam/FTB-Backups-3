@@ -10,6 +10,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.permissions.Permissions;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
@@ -24,7 +25,7 @@ public record BackupProgressPacket(int current, int total) implements CustomPack
             BackupProgressPacket::new
     );
 
-    public static void handler(BackupProgressPacket message, IPayloadContext context) {
+    public static void handler(BackupProgressPacket message, IPayloadContext ignoredContext) {
         BackupsClient.setBackupProgress(message.current, message.total);
     }
 
@@ -47,7 +48,7 @@ public record BackupProgressPacket(int current, int total) implements CustomPack
     private static List<ServerPlayer> getPlayersToNotify(MinecraftServer server) {
         return FTBBackupsServerConfig.NOTIFY_ADMINS_ONLY.get() ?
                 server.getPlayerList().getPlayers().stream()
-                        .filter(sp -> sp.hasPermissions(2) || server.isSingleplayerOwner(sp.getGameProfile()))
+                        .filter(sp -> sp.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER) || server.isSingleplayerOwner(sp.nameAndId()))
                         .toList() :
                 server.getPlayerList().getPlayers();
     }

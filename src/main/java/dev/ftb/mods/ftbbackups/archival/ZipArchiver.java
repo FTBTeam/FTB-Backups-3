@@ -1,10 +1,9 @@
 package dev.ftb.mods.ftbbackups.archival;
 
-import dev.ftb.mods.ftbbackups.Backups;
 import dev.ftb.mods.ftbbackups.FTBBackups;
-import dev.ftb.mods.ftbbackups.config.FTBBackupsServerConfig;
 import dev.ftb.mods.ftbbackups.api.IArchivalPlugin;
-import net.minecraft.resources.ResourceLocation;
+import dev.ftb.mods.ftbbackups.config.FTBBackupsServerConfig;
+import net.minecraft.resources.Identifier;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -19,10 +18,10 @@ import java.util.zip.ZipOutputStream;
 public enum ZipArchiver implements IArchivalPlugin {
     INSTANCE;
 
-    public static final ResourceLocation ID = FTBBackups.id("zip");
+    public static final Identifier ID = FTBBackups.id("zip");
 
     @Override
-    public ResourceLocation getId() {
+    public Identifier getId() {
         return ID;
     }
 

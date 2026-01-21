@@ -4,21 +4,17 @@ import dev.ftb.mods.ftbbackups.api.event.RegisterArchivalPluginEvent;
 import dev.ftb.mods.ftbbackups.archival.ArchivePluginManager;
 import dev.ftb.mods.ftbbackups.archival.FileCopyArchiver;
 import dev.ftb.mods.ftbbackups.archival.ZipArchiver;
-import dev.ftb.mods.ftbbackups.client.BackupsClient;
 import dev.ftb.mods.ftbbackups.config.FTBBackupsClientConfig;
 import dev.ftb.mods.ftbbackups.config.FTBBackupsServerConfig;
 import dev.ftb.mods.ftbbackups.net.FTBBackupsNetHandler;
 import dev.ftb.mods.ftbbackups.net.NotifyDisabledPacket;
 import dev.ftb.mods.ftblibrary.config.manager.ConfigManager;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
-import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
-import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
@@ -36,9 +32,6 @@ public class FTBBackups {
     public static final String MOD_ID = "ftbbackups3";
 
     public FTBBackups(IEventBus eventBus) {
-        if (FMLEnvironment.dist == Dist.CLIENT) {
-            eventBus.<FMLClientSetupEvent>addListener(event -> BackupsClient.onModConstruction());
-        }
         eventBus.addListener(this::registerNetwork);
         NeoForge.EVENT_BUS.addListener(EventPriority.HIGH, this::playerLoggedIn);
 
@@ -112,7 +105,7 @@ public class FTBBackups {
         return System.getenv().containsKey("FTB_BACKUPS_DISABLED");
     }
 
-    public static ResourceLocation id(String path) {
-        return ResourceLocation.fromNamespaceAndPath(MOD_ID, path);
+    public static Identifier id(String path) {
+        return Identifier.fromNamespaceAndPath(MOD_ID, path);
     }
 }

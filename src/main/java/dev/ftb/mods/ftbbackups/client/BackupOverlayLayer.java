@@ -2,19 +2,22 @@ package dev.ftb.mods.ftbbackups.client;
 
 import dev.ftb.mods.ftbbackups.FTBBackups;
 import dev.ftb.mods.ftbbackups.config.FTBBackupsClientConfig;
+import dev.ftb.mods.ftblibrary.client.gui.GuiHelper;
+import dev.ftb.mods.ftblibrary.client.icon.Color4IRenderer;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
-import dev.ftb.mods.ftblibrary.ui.GuiHelper;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.LayeredDraw;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
+import net.neoforged.neoforge.client.gui.GuiLayer;
 
-public class BackupOverlayLayer implements LayeredDraw.Layer {
-    public static final ResourceLocation ID = FTBBackups.id("overlay");
+public enum BackupOverlayLayer implements GuiLayer {
+    INSTANCE;
+
+    public static final Identifier ID = FTBBackups.id("overlay");
 
     private int prevProgress;
 
@@ -50,12 +53,12 @@ public class BackupOverlayLayer implements LayeredDraw.Layer {
                 insetX, insetY
         );
 
-        guiGraphics.pose().pushPose();
-        guiGraphics.pose().translate(pos.x(), pos.y(), 100);
-        guiGraphics.pose().scale(scale, scale, 1F);
+        guiGraphics.pose().pushMatrix();
+        guiGraphics.pose().translate(pos.x(), pos.y());
+        guiGraphics.pose().scale(scale, scale);
 
         // panel background
-        Color4I.rgba(0x80200020).draw(guiGraphics, -2, -2, width + 4, height + 4);
+        Color4IRenderer.INSTANCE.render(Color4I.rgba(0x80200020), guiGraphics, -2, -2, width + 4, height + 4);
         GuiHelper.drawHollowRect(guiGraphics, -2, -2, width + 4, height + 4, Color4I.rgba(0x80400040), false);
 
         guiGraphics.drawString(font, line1, 2, 2, 0xFFFAF9F6, false);
@@ -67,7 +70,7 @@ public class BackupOverlayLayer implements LayeredDraw.Layer {
 
         guiGraphics.drawString(font, line2, 14, 2 + font.lineHeight + 5, 0xFFFAF9F6, false);
 
-        guiGraphics.pose().popPose();
+        guiGraphics.pose().popMatrix();
 
         prevProgress = progress.current();
     }

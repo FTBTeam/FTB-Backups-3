@@ -2,7 +2,7 @@ package dev.ftb.mods.ftbbackups.archival;
 
 import dev.ftb.mods.ftbbackups.api.IArchivalPlugin;
 import dev.ftb.mods.ftbbackups.api.event.RegisterArchivalPluginEvent;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.neoforged.neoforge.common.NeoForge;
 import org.jetbrains.annotations.Nullable;
 
@@ -14,7 +14,7 @@ public class ArchivePluginManager {
     private static final ArchivePluginManager CLIENT = new ArchivePluginManager();
     private static final ArchivePluginManager SERVER = new ArchivePluginManager();
 
-    private final Map<ResourceLocation, IArchivalPlugin> plugins = new ConcurrentHashMap<>();
+    private final Map<Identifier, IArchivalPlugin> plugins = new ConcurrentHashMap<>();
 
     private static boolean pluginsRegistered = false;
 
@@ -38,7 +38,7 @@ public class ArchivePluginManager {
     }
 
     @Nullable
-    public IArchivalPlugin getPlugin(ResourceLocation id) {
+    public IArchivalPlugin getPlugin(Identifier id) {
         return plugins.get(id);
     }
 
@@ -46,7 +46,7 @@ public class ArchivePluginManager {
         plugins.clear();
     }
 
-    public Map<ResourceLocation, IArchivalPlugin> plugins() {
+    public Map<Identifier, IArchivalPlugin> plugins() {
         return Collections.unmodifiableMap(plugins);
     }
 }

@@ -2,8 +2,8 @@ package dev.ftb.mods.ftbbackups.api.event;
 
 import dev.ftb.mods.ftbbackups.api.Backup;
 import net.neoforged.bus.api.Event;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.nio.file.Path;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -30,6 +30,7 @@ public class BackupEvent extends Event {
      */
     public static class Post extends BackupEvent {
         private final Backup backup;
+        @Nullable
         private final Exception error;
 
         public Post(Backup backup, @Nullable Exception error) {

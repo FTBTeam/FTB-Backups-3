@@ -9,11 +9,11 @@ import dev.ftb.mods.ftbbackups.archival.ArchivePluginManager;
 import dev.ftb.mods.ftbbackups.config.FTBBackupsServerConfig;
 import dev.ftb.mods.ftbbackups.net.BackupProgressPacket;
 import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.Util;
 import net.minecraft.world.level.storage.LevelResource;
 import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.common.NeoForge;
@@ -21,8 +21,12 @@ import org.apache.commons.lang3.mutable.MutableInt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nullable;
 import java.io.IOException;
-import java.nio.file.*;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -38,7 +42,9 @@ public class Backups {
     public static final Logger LOGGER = LoggerFactory.getLogger(Backups.class);
     public static final String BACKUPS_JSON_FILE = "backups.json";
 
+    @Nullable
     private static Backups clientInstance = null;
+    @Nullable
     private static Backups serverInstance = null;
 
     private final List<Backup> backups = new ArrayList<>();
@@ -120,9 +126,7 @@ public class Backups {
             backupStatus = BackupStatus.NONE;
 
             for (ServerLevel level : server.getAllLevels()) {
-                if (level != null) {
-                    level.noSave = false;
-                }
+                level.noSave = false;
             }
 
             if (!FTBBackupsServerConfig.SILENT.get()) {
@@ -164,9 +168,7 @@ public class Backups {
         nextBackupTime = System.currentTimeMillis() + FTBBackupsServerConfig.getBackupTimerMillis();
 
         for (ServerLevel level : server.getAllLevels()) {
-            if (level != null) {
-                level.noSave = true;
-            }
+            level.noSave = true;
         }
 
         backupStatus = BackupStatus.RUNNING;
@@ -238,7 +240,7 @@ public class Backups {
 
         printFiles = false;
 
-        Backup backup = new Backup(now, archivalPlugin.getId(), backupFileName, server.getWorldData().getLevelName(), getLastIndex() + 1, success, archiveSize, fileCount.getValue());
+        Backup backup = new Backup(now, archivalPlugin.getId(), backupFileName, server.getWorldData().getLevelName(), getLastIndex() + 1, success, archiveSize, fileCount.intValue());
         backups.add(backup);
 
         Backup.LIST_CODEC.encodeStart(JsonOps.INSTANCE, backups)

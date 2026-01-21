@@ -2,7 +2,7 @@ package dev.ftb.mods.ftbbackups.archival;
 
 import dev.ftb.mods.ftbbackups.FTBBackups;
 import dev.ftb.mods.ftbbackups.api.IArchivalPlugin;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -12,10 +12,10 @@ import java.util.Map;
 public enum FileCopyArchiver implements IArchivalPlugin {
     INSTANCE;
 
-    public static final ResourceLocation ID = FTBBackups.id("filecopy");
+    public static final Identifier ID = FTBBackups.id("filecopy");
 
     @Override
-    public ResourceLocation getId() {
+    public Identifier getId() {
         return ID;
     }
 
