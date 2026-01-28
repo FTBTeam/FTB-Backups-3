@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [21.1.4]
+
+### Fixed
+* Fixed issues with backups getting skipped in SSP if player was not logged in long enough (i.e. less than the backup interval)
+
 ## [21.1.3]
 
 ### Added
