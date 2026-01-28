@@ -89,7 +89,7 @@ public class BackupCommands {
     }
 
     private static int time(CommandSourceStack source) {
-        Duration d = Duration.between(Instant.now(), Instant.ofEpochMilli(Backups.getServerInstance().nextBackupTime));
+        Duration d = Duration.between(Instant.now(), Instant.ofEpochMilli(Backups.getServerInstance().nextBackupTime()));
         String key = d.isNegative() ? "ftbbackups3.lang.timer.in_past" : "ftbbackups3.lang.timer";
         Duration a = d.abs();
         Component msg = Component.translatable(key, String.format("%02d:%02d:%02d", a.toHoursPart(), a.toMinutesPart(), a.toSecondsPart()));

@@ -49,7 +49,7 @@ public class Backups {
 
     private final List<Backup> backups = new ArrayList<>();
     public Path backupsFolder;
-    public long nextBackupTime = -1L;
+    private long lastGoodBackupTime = 0L;
     public BackupStatus backupStatus;
     public boolean printFiles = false;
 
@@ -103,6 +103,12 @@ public class Backups {
         Backup.LIST_CODEC.parse(JsonOps.INSTANCE, element)
                 .resultOrPartial(err -> LOGGER.warn("can't parse backups index {}", backupsIndex))
                 .ifPresent(backups::addAll);
+
+        backups.forEach(backup -> {
+            if (backup.success()) {
+                lastGoodBackupTime = Math.max(lastGoodBackupTime, backup.time());
+            }
+        });
     }
 
     private static Path backupsIndexPath() {
@@ -110,11 +116,7 @@ public class Backups {
     }
 
     public void tick(MinecraftServer server, long now) {
-        if (nextBackupTime < 0) {
-            // will be the case on the first tick
-            nextBackupTime = System.currentTimeMillis() + FTBBackupsServerConfig.getBackupTimerMillis();
-        }
-
+        long nextBackupTime = nextBackupTime();
         if (nextBackupTime > 0L && nextBackupTime <= now) {
             if (!FTBBackupsServerConfig.ONLY_IF_PLAYERS_ONLINE.get() || playersOnlineSinceLastBackup || !server.getPlayerList().getPlayers().isEmpty()) {
                 playersOnlineSinceLastBackup = false;
@@ -165,7 +167,6 @@ public class Backups {
 
         notifyAll(server, Component.translatable("ftbbackups3.lang.start", name), false);
         LOGGER.info("backup starting: {}", name.getString());
-        nextBackupTime = System.currentTimeMillis() + FTBBackupsServerConfig.getBackupTimerMillis();
 
         for (ServerLevel level : server.getAllLevels()) {
             level.noSave = true;
@@ -229,6 +230,7 @@ public class Backups {
             );
 
             success = true;
+            lastGoodBackupTime = now;
         } catch (Exception ex) {
             if (!FTBBackupsServerConfig.SILENT.get()) {
                 String errorName = ex.getClass().getName();
@@ -388,6 +390,10 @@ public class Backups {
 
     public Collection<Backup> backups() {
         return Collections.unmodifiableCollection(backups);
+    }
+
+    public long nextBackupTime() {
+        return lastGoodBackupTime + FTBBackupsServerConfig.getBackupTimerMillis();
     }
 
     private record BackupContext(

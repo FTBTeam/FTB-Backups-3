@@ -12,6 +12,7 @@ import dev.ftb.mods.ftblibrary.config.manager.ConfigManager;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.Util;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
@@ -98,7 +99,7 @@ public class FTBBackups {
     }
 
     public void levelTick(ServerTickEvent.Post event) {
-        Backups.getServerInstance().tick(event.getServer(), System.currentTimeMillis());
+        Backups.getServerInstance().tick(event.getServer(), Util.getEpochMillis());
     }
 
     public static boolean isDisabledByEnvironmentVar() {
