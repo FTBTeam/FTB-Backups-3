@@ -14,6 +14,7 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.permissions.Permissions;
 import net.minecraft.world.level.storage.LevelResource;
 
 import java.time.Duration;
@@ -67,7 +68,7 @@ public class BackupCommands {
     }
 
     private static boolean isAdmin(CommandSourceStack cs) {
-        return cs.getServer().isSingleplayer() || cs.hasPermission(3);
+        return cs.getServer().isSingleplayer() || cs.permissions().hasPermission(Permissions.COMMANDS_ADMIN);
     }
 
     private static int editServerConfig(CommandSourceStack source) throws CommandSyntaxException {
@@ -88,7 +89,7 @@ public class BackupCommands {
     }
 
     private static int time(CommandSourceStack source) {
-        Duration d = Duration.between(Instant.now(), Instant.ofEpochMilli(Backups.getServerInstance().nextBackupTime));
+        Duration d = Duration.between(Instant.now(), Instant.ofEpochMilli(Backups.getServerInstance().nextBackupTime()));
         String key = d.isNegative() ? "ftbbackups3.lang.timer.in_past" : "ftbbackups3.lang.timer";
         Duration a = d.abs();
         Component msg = Component.translatable(key, String.format("%02d:%02d:%02d", a.toHoursPart(), a.toMinutesPart(), a.toSecondsPart()));
@@ -127,11 +128,9 @@ public class BackupCommands {
 
     private static int status(CommandSourceStack source) {
         source.getServer().getAllLevels().forEach(level -> {
-            if (level != null) {
-                Component enabled = Component.translatable("ftbbackups3.lang.autosave." + (level.noSave() ? "disabled" : "enabled")).withStyle(ChatFormatting.AQUA);
-                Component dim = Component.literal(level.dimension().location().toString()).withStyle(ChatFormatting.YELLOW);
-                source.sendSuccess(() -> Component.translatable("ftbbackups3.lang.autosave_status", dim, enabled), true);
-            }
+            Component enabled = Component.translatable("ftbbackups3.lang.autosave." + (level.noSave() ? "disabled" : "enabled")).withStyle(ChatFormatting.AQUA);
+            Component dim = Component.literal(level.dimension().identifier().toString()).withStyle(ChatFormatting.YELLOW);
+            source.sendSuccess(() -> Component.translatable("ftbbackups3.lang.autosave_status", dim, enabled), true);
         });
 
         return Command.SINGLE_SUCCESS;
@@ -143,11 +142,9 @@ public class BackupCommands {
     @Deprecated(forRemoval = true, since = "21.1.0")
     private static int resetState(CommandSourceStack source) {
         source.getServer().getAllLevels().forEach(level -> {
-            if (level != null) {
-                source.sendSuccess(() -> Component.literal("Reseting state + saving for " + level.dimension().location()), true);
-                level.noSave = false;
-                level.save(null, true, true);
-            }
+            source.sendSuccess(() -> Component.literal("Reseting state + saving for " + level.dimension().identifier()), true);
+            level.noSave = false;
+            level.save(null, true, true);
         });
 
         source.sendSuccess(() -> Component.literal("Reseting state + saving for players"), true);

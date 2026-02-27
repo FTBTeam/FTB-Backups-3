@@ -2,17 +2,18 @@ package dev.ftb.mods.ftbbackups.client;
 
 import dev.ftb.mods.ftbbackups.archival.ArchivePluginManager;
 import dev.ftb.mods.ftbbackups.config.ArchivalPluginConfig;
-import dev.ftb.mods.ftblibrary.config.ConfigCallback;
+import dev.ftb.mods.ftblibrary.client.config.ConfigCallback;
+import dev.ftb.mods.ftblibrary.client.gui.input.Key;
+import dev.ftb.mods.ftblibrary.client.gui.input.MouseButton;
+import dev.ftb.mods.ftblibrary.client.gui.screens.AbstractButtonListScreen;
+import dev.ftb.mods.ftblibrary.client.gui.theme.Theme;
+import dev.ftb.mods.ftblibrary.client.gui.widget.Panel;
+import dev.ftb.mods.ftblibrary.client.gui.widget.SimpleTextButton;
+import dev.ftb.mods.ftblibrary.client.icon.Color4IRenderer;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
-import dev.ftb.mods.ftblibrary.ui.Panel;
-import dev.ftb.mods.ftblibrary.ui.SimpleTextButton;
-import dev.ftb.mods.ftblibrary.ui.Theme;
-import dev.ftb.mods.ftblibrary.ui.input.Key;
-import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
-import dev.ftb.mods.ftblibrary.ui.misc.AbstractButtonListScreen;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 public class SelectArchivalPluginScreen extends AbstractButtonListScreen {
     private final ArchivalPluginConfig config;
@@ -54,9 +55,9 @@ public class SelectArchivalPluginScreen extends AbstractButtonListScreen {
     }
 
     private class PluginButton extends SimpleTextButton {
-        private final ResourceLocation value;
+        private final Identifier value;
 
-        PluginButton(Panel panel, ResourceLocation value) {
+        PluginButton(Panel panel, Identifier value) {
             super(panel, Component.literal(value.toString()), Color4I.empty());
             this.value = value;
         }
@@ -64,16 +65,17 @@ public class SelectArchivalPluginScreen extends AbstractButtonListScreen {
         @Override
         public void drawBackground(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
             if (isMouseOver) {
-                Color4I.WHITE.withAlpha(30).draw(graphics, x, y, w, h);
+                Color4IRenderer.INSTANCE.render(Color4I.WHITE.withAlpha(30), graphics, x, y, w, h);
             }
-            Color4I.GRAY.withAlpha(40).draw(graphics, x, y + h, w, 1);
+            Color4IRenderer.INSTANCE.render(Color4I.GRAY.withAlpha(40), graphics, x, y + h, w, 1);
         }
 
         @Override
         public void onClicked(MouseButton mouseButton) {
             playClickSound();
-            config.setCurrentValue(value);
-            callback.save(true);
+            if (config.updateValue(value.toString())) {
+                callback.save(true);
+            }
         }
     }
 }

@@ -12,6 +12,7 @@ import net.minecraft.network.chat.MutableComponent;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
@@ -19,14 +20,15 @@ import net.neoforged.neoforge.client.event.ScreenEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import org.jetbrains.annotations.NotNull;
 
-@EventBusSubscriber(modid = FTBBackups.MOD_ID, value = Dist.CLIENT, bus = EventBusSubscriber.Bus.MOD)
+@Mod(value = FTBBackups.MOD_ID, dist = Dist.CLIENT)
+@EventBusSubscriber(modid = FTBBackups.MOD_ID, value = Dist.CLIENT)
 public class BackupsClient {
     private static BackupProgress backupProgress = BackupProgress.NONE;
 
     private static int progressTicker = 0;
     private static boolean disabledOnServer = false;
 
-    public static void onModConstruction() {
+    public BackupsClient() {
         NeoForge.EVENT_BUS.addListener(BackupsClient::onClientDisconnected);
         NeoForge.EVENT_BUS.addListener(BackupsClient::addRestoreButton);
         NeoForge.EVENT_BUS.addListener(BackupsClient::clientTick);
@@ -57,7 +59,7 @@ public class BackupsClient {
     public static void registerGuiLayer(RegisterGuiLayersEvent event) {
         // needs to be done with SubscribeEvent, addListener() is called too late
         if (!FTBBackups.isDisabledByEnvironmentVar()) {
-            event.registerAboveAll(BackupOverlayLayer.ID, new BackupOverlayLayer());
+            event.registerAboveAll(BackupOverlayLayer.ID, BackupOverlayLayer.INSTANCE);
         }
     }
 

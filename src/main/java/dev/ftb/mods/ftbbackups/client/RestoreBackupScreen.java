@@ -1,12 +1,11 @@
 package dev.ftb.mods.ftbbackups.client;
 
 import dev.ftb.mods.ftbbackups.Backups;
-import dev.ftb.mods.ftbbackups.config.FTBBackupsServerConfig;
 import dev.ftb.mods.ftbbackups.api.Backup;
 import dev.ftb.mods.ftbbackups.api.IArchivalPlugin;
 import dev.ftb.mods.ftbbackups.archival.ArchivePluginManager;
+import dev.ftb.mods.ftbbackups.config.FTBBackupsServerConfig;
 import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -16,10 +15,11 @@ import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.neoforged.fml.loading.FMLPaths;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -29,12 +29,11 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.stream.Stream;
 
 public class RestoreBackupScreen extends Screen {
     private Button restoreButton;
@@ -46,8 +45,8 @@ public class RestoreBackupScreen extends Screen {
     private int completedTimer = 0;
     private String lastError = "";
 
-    private static final ResourceLocation SUCCESS = ResourceLocation.withDefaultNamespace("pending_invite/accept");
-    private static final ResourceLocation FAILURE = ResourceLocation.withDefaultNamespace("pending_invite/reject");
+    private static final Identifier SUCCESS = Identifier.withDefaultNamespace("pending_invite/accept");
+    private static final Identifier FAILURE = Identifier.withDefaultNamespace("pending_invite/reject");
 
     static final int UPPER_HEIGHT = 80;
     static final int LOWER_HEIGHT = 40;
@@ -174,8 +173,6 @@ public class RestoreBackupScreen extends Screen {
         int px = (guiGraphics.guiWidth() - pw) / 2;
         int py = (guiGraphics.guiHeight() - ph) / 2;
 
-        guiGraphics.pose().pushPose();
-        guiGraphics.pose().translate(0, 0, 200);
         guiGraphics.fill(px - 2, py - 2, px + pw + 2, py + ph + 2, 0xFF404040);
         guiGraphics.fill(px, py, px + pw, py + ph, 0xFFC0C0C0);
 
@@ -189,15 +186,13 @@ public class RestoreBackupScreen extends Screen {
             guiGraphics.fill(px + 10, sy, px + pw - 10, sy + sh, 0xFF202020);
             int sw = (int) ((pw - 24) * currentFile.get() / total);
             guiGraphics.fill(px + 12, sy + 2, px + 10 + sw, sy + sh - 2, 0xFF0040C0);
-
-            guiGraphics.pose().popPose();
         } else if (completedTimer > 0) {
             if (lastError.isEmpty()) {
-                guiGraphics.blitSprite(SUCCESS, px + 10, py + (ph - 32) / 2, 0, 32, 32);
-                guiGraphics.drawString(font, Component.translatable("ftbbackups3.gui.restore.success"), px + 50, py + (ph - font.lineHeight) / 2, 0x404040, false);
+                guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED, SUCCESS, px + 10, py + (ph - 32) / 2, 32, 32, 0xFFFFFFFF);
+                guiGraphics.drawString(font, Component.translatable("ftbbackups3.gui.restore.success"), px + 50, py + (ph - font.lineHeight) / 2, 0xFF404040, false);
             } else {
-                guiGraphics.blitSprite(FAILURE, px + 10, py + (ph - 32) / 2, 0, 32, 32);
-                guiGraphics.drawString(font, Component.translatable("ftbbackups3.gui.restore.failure", lastError), px + 50, py + (ph - font.lineHeight) / 2, 0x404040, false);
+                guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED, FAILURE, px + 10, py + (ph - 32) / 2, 32, 32, 0xFFFFFFFF);
+                guiGraphics.drawString(font, Component.translatable("ftbbackups3.gui.restore.failure", lastError), px + 50, py + (ph - font.lineHeight) / 2, 0xFFC04040, false);
             }
         }
     }
@@ -210,19 +205,17 @@ public class RestoreBackupScreen extends Screen {
         }
 
         private void addChildren(String filter) {
-            List<Entry> entries = new ArrayList<>();
-
             String filterL = filter.toLowerCase(Locale.ROOT);
-
-            for (Backup b : Backups.getClientInstance().backups()) {
-                if (b.success() && b.fileCount() > 0 && (filter.isEmpty() || b.worldName().toLowerCase(Locale.ROOT).contains(filterL))) {
-                    entries.add(new Entry(b));
-                }
-            }
+            List<Entry> entries = Backups.getClientInstance().backups().stream()
+                    .filter(b -> b.success() && b.fileCount() > 0
+                            && (filter.isEmpty() || b.worldName().toLowerCase(Locale.ROOT).contains(filterL))
+                    )
+                    .map(Entry::new)
+                    .sorted((o1, o2) -> o2.backup.compareTo(o1.backup))
+                    .toList();
 
             // TODO controls to alter sort order
-
-            children().addAll(entries.stream().sorted((o1, o2) -> o2.backup.compareTo(o1.backup)).toList());
+            replaceEntries(entries);
         }
 
         @Override
@@ -235,7 +228,7 @@ public class RestoreBackupScreen extends Screen {
         }
 
         @Override
-        protected int getScrollbarPosition() {
+        protected int scrollBarX() {
             return width / 2 + 200;
         }
 
@@ -246,7 +239,6 @@ public class RestoreBackupScreen extends Screen {
         }
 
         private void onFilterChanged(String filter) {
-            children().clear();
             addChildren(filter);
         }
 
@@ -254,50 +246,45 @@ public class RestoreBackupScreen extends Screen {
             private static final String DATE_FORMAT = "MMM d, yyyy HH:mm a";
 
             private final Backup backup;
-            private long lastClickTime;
 
             public Entry(Backup backup) {
                 this.backup = backup;
             }
 
             @Override
-            public boolean mouseClicked(double x, double y, int partialTick) {
+            public boolean mouseClicked(MouseButtonEvent event, boolean isDoubleClick) {
                 BackupsList.this.setSelected(this);
 
-                if (Util.getMillis() - lastClickTime < 250L) {
+                if (isDoubleClick) {
                     RestoreBackupScreen.this.onActivate();
                     return true;
-                } else {
-                    lastClickTime = Util.getMillis();
-                    return false;
                 }
+
+                return super.mouseClicked(event, false);
             }
 
             @Override
-            public void render(GuiGraphics guiGraphics, int index, int top, int left, int width, int height, int mouseX, int mouseY, boolean hovering, float partialTick) {
+            public void renderContent(GuiGraphics guiGraphics, int x, int y, boolean mouseOver, float partialTick) {
                 Font font = Minecraft.getInstance().font;
 
-                int startX = left + 80;
+                int startX = getContentX() + 80;
 
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_FORMAT);
                 ZonedDateTime ldt = ZonedDateTime.ofInstant(Instant.ofEpochMilli(backup.time()), ZoneId.systemDefault());
 
-                int y0 = top + 5;
+                int y0 = getContentY() + 5;
                 int lh = font.lineHeight + 2;
 
-                guiGraphics.drawString(font, Component.translatable(backup.worldName()), startX, y0, 0xFFFFFF);
-                guiGraphics.drawString(font, Component.literal(ldt.format(formatter)), startX + 10, y0 + lh, 0xC0C0C0);
+                guiGraphics.drawString(font, Component.translatable(backup.worldName()), startX, y0, 0xFFFFFFFF);
+                guiGraphics.drawString(font, Component.literal(ldt.format(formatter)), startX + 10, y0 + lh, 0xFFC0C0C0);
 
-                if (isMouseOver(mouseX, mouseY)) {
-                    setTooltipForNextRenderPass(Stream.of(
-                                            Component.translatable("ftbbackups3.gui.list.file",
-                                                    Component.literal(backup.fileId()).withStyle(ChatFormatting.GRAY)),
-                                            Component.translatable("ftbbackups3.gui.list.plugin",
-                                                    Component.literal(backup.archivalPlugin().toString()).withStyle(ChatFormatting.GRAY))
-                                    )
-                                    .map(MutableComponent::getVisualOrderText)
-                                    .toList()
-                    );
+                if (mouseOver) {
+                    guiGraphics.setTooltipForNextFrame(font, List.of(
+                            Component.translatable("ftbbackups3.gui.list.file",
+                                    Component.literal(backup.fileId()).withStyle(ChatFormatting.GRAY)),
+                            Component.translatable("ftbbackups3.gui.list.plugin",
+                                    Component.literal(backup.archivalPlugin().toString()).withStyle(ChatFormatting.GRAY))
+                    ), Optional.empty(), x, y);
                 }
             }
         }

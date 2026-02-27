@@ -1,6 +1,6 @@
 package dev.ftb.mods.ftbbackups.api;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.ApiStatus;
 import org.slf4j.Logger;
 
@@ -17,7 +17,7 @@ public interface IArchivalPlugin {
     /**
      * {@return a unique ID for this plugin; it should be namespaced with your mod name}
      */
-    ResourceLocation getId();
+    Identifier getId();
 
     /**
      * Get the file extension for backup files created by this plugin. By default, this is the path component

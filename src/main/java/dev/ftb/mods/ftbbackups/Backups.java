@@ -9,11 +9,11 @@ import dev.ftb.mods.ftbbackups.archival.ArchivePluginManager;
 import dev.ftb.mods.ftbbackups.config.FTBBackupsServerConfig;
 import dev.ftb.mods.ftbbackups.net.BackupProgressPacket;
 import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.Util;
 import net.minecraft.world.level.storage.LevelResource;
 import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.common.NeoForge;
@@ -21,8 +21,12 @@ import org.apache.commons.lang3.mutable.MutableInt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nullable;
 import java.io.IOException;
-import java.nio.file.*;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -38,12 +42,14 @@ public class Backups {
     public static final Logger LOGGER = LoggerFactory.getLogger(Backups.class);
     public static final String BACKUPS_JSON_FILE = "backups.json";
 
+    @Nullable
     private static Backups clientInstance = null;
+    @Nullable
     private static Backups serverInstance = null;
 
     private final List<Backup> backups = new ArrayList<>();
     public Path backupsFolder;
-    public long nextBackupTime = -1L;
+    private long lastGoodBackupTime = 0L;
     public BackupStatus backupStatus;
     public boolean printFiles = false;
 
@@ -97,6 +103,12 @@ public class Backups {
         Backup.LIST_CODEC.parse(JsonOps.INSTANCE, element)
                 .resultOrPartial(err -> LOGGER.warn("can't parse backups index {}", backupsIndex))
                 .ifPresent(backups::addAll);
+
+        backups.forEach(backup -> {
+            if (backup.success()) {
+                lastGoodBackupTime = Math.max(lastGoodBackupTime, backup.time());
+            }
+        });
     }
 
     private static Path backupsIndexPath() {
@@ -104,11 +116,7 @@ public class Backups {
     }
 
     public void tick(MinecraftServer server, long now) {
-        if (nextBackupTime < 0) {
-            // will be the case on the first tick
-            nextBackupTime = System.currentTimeMillis() + FTBBackupsServerConfig.getBackupTimerMillis();
-        }
-
+        long nextBackupTime = nextBackupTime();
         if (nextBackupTime > 0L && nextBackupTime <= now) {
             if (!FTBBackupsServerConfig.ONLY_IF_PLAYERS_ONLINE.get() || playersOnlineSinceLastBackup || !server.getPlayerList().getPlayers().isEmpty()) {
                 playersOnlineSinceLastBackup = false;
@@ -120,9 +128,7 @@ public class Backups {
             backupStatus = BackupStatus.NONE;
 
             for (ServerLevel level : server.getAllLevels()) {
-                if (level != null) {
-                    level.noSave = false;
-                }
+                level.noSave = false;
             }
 
             if (!FTBBackupsServerConfig.SILENT.get()) {
@@ -161,12 +167,9 @@ public class Backups {
 
         notifyAll(server, Component.translatable("ftbbackups3.lang.start", name), false);
         LOGGER.info("backup starting: {}", name.getString());
-        nextBackupTime = System.currentTimeMillis() + FTBBackupsServerConfig.getBackupTimerMillis();
 
         for (ServerLevel level : server.getAllLevels()) {
-            if (level != null) {
-                level.noSave = true;
-            }
+            level.noSave = true;
         }
 
         backupStatus = BackupStatus.RUNNING;
@@ -227,6 +230,7 @@ public class Backups {
             );
 
             success = true;
+            lastGoodBackupTime = now;
         } catch (Exception ex) {
             if (!FTBBackupsServerConfig.SILENT.get()) {
                 String errorName = ex.getClass().getName();
@@ -238,7 +242,7 @@ public class Backups {
 
         printFiles = false;
 
-        Backup backup = new Backup(now, archivalPlugin.getId(), backupFileName, server.getWorldData().getLevelName(), getLastIndex() + 1, success, archiveSize, fileCount.getValue());
+        Backup backup = new Backup(now, archivalPlugin.getId(), backupFileName, server.getWorldData().getLevelName(), getLastIndex() + 1, success, archiveSize, fileCount.intValue());
         backups.add(backup);
 
         Backup.LIST_CODEC.encodeStart(JsonOps.INSTANCE, backups)
@@ -386,6 +390,10 @@ public class Backups {
 
     public Collection<Backup> backups() {
         return Collections.unmodifiableCollection(backups);
+    }
+
+    public long nextBackupTime() {
+        return lastGoodBackupTime + FTBBackupsServerConfig.getBackupTimerMillis();
     }
 
     private record BackupContext(

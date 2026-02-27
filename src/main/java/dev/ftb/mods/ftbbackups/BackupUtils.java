@@ -1,9 +1,6 @@
 package dev.ftb.mods.ftbbackups;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonIOException;
-import com.google.gson.JsonNull;
-import com.google.gson.JsonSyntaxException;
+import com.google.gson.*;
 import com.google.gson.internal.Streams;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonToken;
@@ -48,7 +45,7 @@ public class BackupUtils {
                 }
 
                 @Override
-                public FileVisitResult postVisitDirectory(Path dir, IOException exc) {
+                public FileVisitResult postVisitDirectory(Path dir, @Nullable IOException exc) {
                     if (exc != null) {
                         Backups.LOGGER.error("getSize: had trouble traversing dir: {} ({})", dir, exc);
                     }
@@ -92,7 +89,7 @@ public class BackupUtils {
         }
 
         JsonWriter jsonWriter = new JsonWriter(writer);
-        jsonWriter.setLenient(true);
+        jsonWriter.setStrictness(Strictness.LENIENT);
         jsonWriter.setHtmlSafe(false);
         jsonWriter.setSerializeNulls(true);
 
@@ -126,7 +123,7 @@ public class BackupUtils {
 
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(jsonFile.toFile()), StandardCharsets.UTF_8))) {
             JsonReader jsonReader = new JsonReader(reader);
-            jsonReader.setLenient(true);
+            jsonReader.setStrictness(Strictness.LENIENT);
             JsonElement element = Streams.parse(jsonReader);
 
             if (!element.isJsonNull() && jsonReader.peek() != JsonToken.END_DOCUMENT) {

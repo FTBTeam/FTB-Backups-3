@@ -3,7 +3,7 @@ package dev.ftb.mods.ftbbackups.api;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.ftb.mods.ftbbackups.Backups;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.apache.commons.io.FileUtils;
 
 import java.io.IOException;
@@ -22,10 +22,10 @@ import java.util.List;
  * @param success true if the backup succeeded, false if there were any problems
  * @param size nominal size of the backup in bytes
  */
-public record Backup(long time, ResourceLocation archivalPlugin, String fileId, String worldName, int index, boolean success, long size, int fileCount) implements Comparable<Backup> {
+public record Backup(long time, Identifier archivalPlugin, String fileId, String worldName, int index, boolean success, long size, int fileCount) implements Comparable<Backup> {
     public static final Codec<Backup> CODEC = RecordCodecBuilder.create(builder -> builder.group(
             Codec.LONG.fieldOf("time").forGetter(Backup::time),
-            ResourceLocation.CODEC.fieldOf("archival_plugin").forGetter(Backup::archivalPlugin),
+            Identifier.CODEC.fieldOf("archival_plugin").forGetter(Backup::archivalPlugin),
             Codec.STRING.fieldOf("file").forGetter(Backup::fileId),
             Codec.STRING.optionalFieldOf("world_name", "<not known>").forGetter(Backup::worldName),
             Codec.INT.fieldOf("index").forGetter(Backup::index),
