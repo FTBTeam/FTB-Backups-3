@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory;
 @Mod(FTBBackups.MOD_ID)
 public class FTBBackups {
     public static final String MOD_ID = "ftbbackups3";
+    public static final String MOD_NAME = "FTB Backups 3";
 
     public FTBBackups(IEventBus eventBus) {
         eventBus.addListener(this::registerNetwork);

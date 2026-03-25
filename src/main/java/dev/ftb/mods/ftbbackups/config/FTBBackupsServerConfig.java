@@ -19,13 +19,7 @@ import java.util.List;
 
 public interface FTBBackupsServerConfig {
     String KEY = FTBBackups.MOD_ID + "-server";
-    Config CONFIG = Config.create(KEY)
-            .comment("Server-specific configuration for FTB Backups 3",
-                    "Modpack defaults should be defined in <instance>/config/" + KEY + ".snbt",
-                    "  (may be overwritten on modpack update)",
-                    "Server admins may locally override this by copying into <instance>/world/serverconfig/" + KEY + ".snbt",
-                    "  (will NOT be overwritten on modpack update)"
-            );
+    Config CONFIG = Config.create(KEY).standardTopLevelComment(FTBBackups.MOD_NAME, KEY, false);
 
     // relative to the game directory: <instance>/ftbbackups3
     String DEFAULT_BACKUP_FOLDER = FTBBackups.MOD_ID;

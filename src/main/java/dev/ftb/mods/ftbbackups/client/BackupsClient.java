@@ -18,7 +18,6 @@ import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
 import net.neoforged.neoforge.client.event.ScreenEvent;
 import net.neoforged.neoforge.common.NeoForge;
-import org.jetbrains.annotations.NotNull;
 
 @Mod(value = FTBBackups.MOD_ID, dist = Dist.CLIENT)
 @EventBusSubscriber(modid = FTBBackups.MOD_ID, value = Dist.CLIENT)
@@ -47,7 +46,7 @@ public class BackupsClient {
                 Component btnLabel = Component.translatable("ftbbackups3.gui.restore").append("...");
                 Component title = Component.translatable("ftbbackups3.gui.restore");
                 int w = s.getMinecraft().font.width(btnLabel) + 20;
-                event.addListener(Button.builder(btnLabel, b -> Minecraft.getInstance().setScreen(new RestoreBackupScreen(s, title)))
+                event.addListener(Button.builder(btnLabel, _ -> Minecraft.getInstance().setScreen(new RestoreBackupScreen(s, title)))
                         .bounds(s.width - w - 10, 22, w, 20)
                         .tooltip(Tooltip.create(Component.translatable("ftbbackups3.gui.restore.tooltip")))
                         .build());
@@ -75,7 +74,7 @@ public class BackupsClient {
         setDisabledOnThisServer(false);
     }
 
-    public static @NotNull MutableComponent progressMessage() {
+    public static MutableComponent progressMessage() {
         return Component.translatable("ftbbackups3.lang.timer_progress", backupProgress.current() * 100 / backupProgress.total(), backupProgress.current(), backupProgress.total());
     }
 

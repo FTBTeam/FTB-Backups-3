@@ -2,7 +2,7 @@ plugins {
 	id 'java-library'
 	id 'idea'
 	id 'maven-publish'
-	id 'net.neoforged.moddev' version '2.0.139'
+	id 'net.neoforged.moddev' version '2.0.140'
 	id "me.modmuss50.mod-publish-plugin" version "1.1.0"
 }
 
@@ -22,7 +22,7 @@ base {
 apply from: 'https://raw.githubusercontent.com/FTBTeam/mods-meta/main/gradle/changelog.gradle'
 apply from: "https://raw.githubusercontent.com/FTBTeam/mods-meta/main/gradle/publishing.gradle"
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+java.toolchain.languageVersion = JavaLanguageVersion.of(25)
 
 neoForge {
 	version = "${mcMinorAndPatch}.${neo_version}"
@@ -143,7 +143,7 @@ idea {
 def getMinorAndPatchFromMc() {
 	String mcVersion = project.minecraft_version
 	String[] split = mcVersion.split("\\.")
-	return split[1] + "." + (split[2] ?: "0")
+	return split[0] + "." + split[1] + "." + (split.length > 2 ? split[2] : "0")
 }
 
 publishMods {
@@ -164,7 +164,7 @@ publishMods {
 		accessToken = CFToken.orElse("missing")
 		projectId = project.curseforge_id
 		minecraftVersions.add(project.minecraft_version)
-		javaVersions.add(JavaVersion.VERSION_21)
+		javaVersions.add(JavaVersion.VERSION_25)
 		requires('ftb-library-forge')
 	}
 }

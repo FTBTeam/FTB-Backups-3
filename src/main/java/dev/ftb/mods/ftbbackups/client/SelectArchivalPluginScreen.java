@@ -11,7 +11,7 @@ import dev.ftb.mods.ftblibrary.client.gui.widget.Panel;
 import dev.ftb.mods.ftblibrary.client.gui.widget.SimpleTextButton;
 import dev.ftb.mods.ftblibrary.client.icon.Color4IRenderer;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 
@@ -63,7 +63,7 @@ public class SelectArchivalPluginScreen extends AbstractButtonListScreen {
         }
 
         @Override
-        public void drawBackground(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
+        public void drawBackground(GuiGraphicsExtractor graphics, Theme theme, int x, int y, int w, int h) {
             if (isMouseOver) {
                 Color4IRenderer.INSTANCE.render(Color4I.WHITE.withAlpha(30), graphics, x, y, w, h);
             }

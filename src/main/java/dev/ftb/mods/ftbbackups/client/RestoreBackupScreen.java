@@ -8,7 +8,7 @@ import dev.ftb.mods.ftbbackups.config.FTBBackupsServerConfig;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractSelectionList;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
@@ -70,7 +70,7 @@ public class RestoreBackupScreen extends Screen {
         addRenderableWidget(Button.builder(CommonComponents.GUI_BACK, btn -> onClose())
                 .size(100, 20).pos(width / 2 - 130, height - 30).build());
 
-        restoreButton = Button.builder(Component.translatable("ftbbackups3.gui.restore_now"), btn -> onActivate())
+        restoreButton = Button.builder(Component.translatable("ftbbackups3.gui.restore_now"), _ -> onActivate())
                 .size(150, 20).pos(width / 2 - 20, height - 30).build();
         addRenderableWidget(restoreButton);
         restoreButton.active = false;
@@ -111,7 +111,7 @@ public class RestoreBackupScreen extends Screen {
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
-                }).whenComplete((unused, ex) -> {
+                }).whenComplete((_, ex) -> {
                     if (ex != null) {
                         Backups.LOGGER.error("backup restoration failed: {} -> {}", ex.getClass(), ex.getMessage());
                         lastError = ex.getMessage();
@@ -155,15 +155,15 @@ public class RestoreBackupScreen extends Screen {
     }
 
     @Override
-    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        super.render(guiGraphics, mouseX, mouseY, partialTick);
+    public void extractRenderState(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick) {
+        super.extractRenderState(guiGraphics, mouseX, mouseY, partialTick);
 
-        guiGraphics.drawCenteredString(font, title, width / 2, 8, 0xFFFFFF);
+        guiGraphics.centeredText(font, title, width / 2, 8, 0xFFFFFF);
 
         renderExtractionProgress(guiGraphics, totalFiles);
     }
 
-    private void renderExtractionProgress(GuiGraphics guiGraphics, long total) {
+    private void renderExtractionProgress(GuiGraphicsExtractor guiGraphics, long total) {
         if (total == 0L && completedTimer == 0) {
             return;
         }
@@ -177,8 +177,8 @@ public class RestoreBackupScreen extends Screen {
         guiGraphics.fill(px, py, px + pw, py + ph, 0xFFC0C0C0);
 
         if (total > 0L) {
-            guiGraphics.drawString(font, Component.translatable("ftbbackups3.gui.restore.in_progress"), px + 5, py + 5, 0xFF404040, false);
-            guiGraphics.drawString(font, Component.literal(restoringPath), px + 5, py + ph - font.lineHeight - 5, 0xFF404040, false);
+            guiGraphics.text(font, Component.translatable("ftbbackups3.gui.restore.in_progress"), px + 5, py + 5, 0xFF404040, false);
+            guiGraphics.text(font, Component.literal(restoringPath), px + 5, py + ph - font.lineHeight - 5, 0xFF404040, false);
 
             // progress bar
             int sh = ph / 4;
@@ -189,10 +189,10 @@ public class RestoreBackupScreen extends Screen {
         } else if (completedTimer > 0) {
             if (lastError.isEmpty()) {
                 guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED, SUCCESS, px + 10, py + (ph - 32) / 2, 32, 32, 0xFFFFFFFF);
-                guiGraphics.drawString(font, Component.translatable("ftbbackups3.gui.restore.success"), px + 50, py + (ph - font.lineHeight) / 2, 0xFF404040, false);
+                guiGraphics.text(font, Component.translatable("ftbbackups3.gui.restore.success"), px + 50, py + (ph - font.lineHeight) / 2, 0xFF404040, false);
             } else {
                 guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED, FAILURE, px + 10, py + (ph - 32) / 2, 32, 32, 0xFFFFFFFF);
-                guiGraphics.drawString(font, Component.translatable("ftbbackups3.gui.restore.failure", lastError), px + 50, py + (ph - font.lineHeight) / 2, 0xFFC04040, false);
+                guiGraphics.text(font, Component.translatable("ftbbackups3.gui.restore.failure", lastError), px + 50, py + (ph - font.lineHeight) / 2, 0xFFC04040, false);
             }
         }
     }
@@ -264,7 +264,7 @@ public class RestoreBackupScreen extends Screen {
             }
 
             @Override
-            public void renderContent(GuiGraphics guiGraphics, int x, int y, boolean mouseOver, float partialTick) {
+            public void extractContent(GuiGraphicsExtractor guiGraphics, int x, int y, boolean mouseOver, float partialTick) {
                 Font font = Minecraft.getInstance().font;
 
                 int startX = getContentX() + 80;
@@ -275,8 +275,8 @@ public class RestoreBackupScreen extends Screen {
                 int y0 = getContentY() + 5;
                 int lh = font.lineHeight + 2;
 
-                guiGraphics.drawString(font, Component.translatable(backup.worldName()), startX, y0, 0xFFFFFFFF);
-                guiGraphics.drawString(font, Component.literal(ldt.format(formatter)), startX + 10, y0 + lh, 0xFFC0C0C0);
+                guiGraphics.text(font, Component.translatable(backup.worldName()), startX, y0, 0xFFFFFFFF);
+                guiGraphics.text(font, Component.literal(ldt.format(formatter)), startX + 10, y0 + lh, 0xFFC0C0C0);
 
                 if (mouseOver) {
                     guiGraphics.setTooltipForNextFrame(font, List.of(
