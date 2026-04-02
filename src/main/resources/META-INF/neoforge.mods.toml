@@ -19,3 +19,10 @@ mandatory = true
 versionRange = "${mod_loader_range}"
 ordering = "NONE"
 side="BOTH"
+
+[[dependencies.ftbbackups3]]
+modId = "ftblibrary"
+type = "required"
+versionRange = "[${ftblibraryversion},)"
+ordering = "AFTER"
+side = "BOTH"
