@@ -5,10 +5,10 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import dev.architectury.networking.NetworkManager;
 import dev.ftb.mods.ftbbackups.config.FTBBackupsClientConfig;
 import dev.ftb.mods.ftbbackups.config.FTBBackupsServerConfig;
 import dev.ftb.mods.ftblibrary.net.EditConfigChoicePacket;
+import dev.ftb.mods.ftblibrary.util.neoforge.NetworkHelperImpl;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -72,17 +72,17 @@ public class BackupCommands {
     }
 
     private static int editServerConfig(CommandSourceStack source) throws CommandSyntaxException {
-        NetworkManager.sendToPlayer(source.getPlayerOrException(), EditConfigChoicePacket.server(FTBBackupsServerConfig.KEY));
+        NetworkHelperImpl.sendTo(source.getPlayerOrException(), EditConfigChoicePacket.server(FTBBackupsServerConfig.KEY));
         return Command.SINGLE_SUCCESS;
     }
 
     private static int editClientConfig(CommandSourceStack source) throws CommandSyntaxException {
-        NetworkManager.sendToPlayer(source.getPlayerOrException(), EditConfigChoicePacket.client(FTBBackupsClientConfig.KEY));
+        NetworkHelperImpl.sendTo(source.getPlayerOrException(), EditConfigChoicePacket.client(FTBBackupsClientConfig.KEY));
         return Command.SINGLE_SUCCESS;
     }
 
     private static int editConfig(CommandSourceStack source) throws CommandSyntaxException {
-        NetworkManager.sendToPlayer(source.getPlayerOrException(), EditConfigChoicePacket.choose(
+        NetworkHelperImpl.sendTo(source.getPlayerOrException(), EditConfigChoicePacket.choose(
                 FTBBackupsClientConfig.KEY, FTBBackupsServerConfig.KEY, Component.literal("FTB Backups 3"))
         );
         return Command.SINGLE_SUCCESS;

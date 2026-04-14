@@ -9,13 +9,7 @@ import dev.ftb.mods.ftblibrary.util.PanelPositioning;
 
 public interface FTBBackupsClientConfig {
     String KEY = FTBBackups.MOD_ID + "-client";
-    Config CONFIG = Config.create(KEY)
-            .comment("Client-specific configuration for FTB Backups 3",
-                    "Modpack defaults should be defined in <instance>/config/" + KEY + ".snbt",
-                    "  (may be overwritten on modpack update)",
-                    "Players may locally override this by copying into <instance>/local/" + KEY + ".snbt",
-                    "  (will NOT be overwritten on modpack update)"
-            );
+    Config CONFIG = Config.create(KEY).standardTopLevelComment(FTBBackups.MOD_NAME, KEY, true);
 
     Config OVERLAY = CONFIG.addGroup("overlay");
     BooleanValue SHOW_OVERLAY = OVERLAY.addBoolean("show_overlay", true);

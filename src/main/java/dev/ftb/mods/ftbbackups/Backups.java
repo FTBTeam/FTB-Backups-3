@@ -2,12 +2,16 @@ package dev.ftb.mods.ftbbackups;
 
 import com.google.gson.JsonElement;
 import com.mojang.serialization.JsonOps;
+import de.marhali.json5.Json5Array;
+import de.marhali.json5.Json5Element;
 import dev.ftb.mods.ftbbackups.api.Backup;
 import dev.ftb.mods.ftbbackups.api.IArchivalPlugin;
 import dev.ftb.mods.ftbbackups.api.event.BackupEvent;
 import dev.ftb.mods.ftbbackups.archival.ArchivePluginManager;
 import dev.ftb.mods.ftbbackups.config.FTBBackupsServerConfig;
 import dev.ftb.mods.ftbbackups.net.BackupProgressPacket;
+import dev.ftb.mods.ftblibrary.json5.Json5Ops;
+import dev.ftb.mods.ftblibrary.json5.Json5Util;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextColor;
@@ -40,7 +44,7 @@ public class Backups {
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd-HH-mm-ss");
 
     public static final Logger LOGGER = LoggerFactory.getLogger(Backups.class);
-    public static final String BACKUPS_JSON_FILE = "backups.json";
+    public static final String BACKUPS_JSON_FILE = "backups.json5";
 
     @Nullable
     private static Backups clientInstance = null;
@@ -84,8 +88,8 @@ public class Backups {
         try {
             Files.createDirectories(backupsFolder);
             backupsFolder = backupsFolder.toRealPath();
-        } catch (Exception ignored) {
-            LOGGER.error("Failed to create backups folder: {}", backupsFolder);
+        } catch (Exception ex) {
+            LOGGER.error("Failed to create backups folder {}: {}", backupsFolder, ex.getMessage());
         }
 
         backupStatus = BackupStatus.NONE;
@@ -99,10 +103,23 @@ public class Backups {
         backups.clear();
 
         Path backupsIndex = backupsIndexPath();
-        JsonElement element = BackupUtils.readJson(backupsIndex);
-        Backup.LIST_CODEC.parse(JsonOps.INSTANCE, element)
-                .resultOrPartial(err -> LOGGER.warn("can't parse backups index {}", backupsIndex))
-                .ifPresent(backups::addAll);
+        if (Files.exists(backupsIndex)) {
+            try {
+                var json = Json5Util.tryRead(backupsIndex, Json5Array.class);
+                Backup.LIST_CODEC.parse(Json5Ops.INSTANCE, json)
+                        .resultOrPartial(err -> LOGGER.warn("can't parse backups index {}: {}", backupsIndex, err))
+                        .ifPresent(backups::addAll);
+            } catch (IOException ex) {
+                LOGGER.error("can't read {}: {}", backupsIndex, ex.getMessage());
+            }
+        } else {
+            try {
+                Json5Util.tryWrite(backupsIndex, new Json5Array());
+                LOGGER.info("created new empty backups index {}", backupsIndex);
+            } catch (IOException ex) {
+                LOGGER.error("can't write {}: {}", backupsIndex, ex.getMessage());
+            }
+        }
 
         backups.forEach(backup -> {
             if (backup.success()) {
@@ -245,8 +262,13 @@ public class Backups {
         Backup backup = new Backup(now, archivalPlugin.getId(), backupFileName, server.getWorldData().getLevelName(), getLastIndex() + 1, success, archiveSize, fileCount.intValue());
         backups.add(backup);
 
-        Backup.LIST_CODEC.encodeStart(JsonOps.INSTANCE, backups)
-                .ifSuccess(json -> BackupUtils.writeJson(backupsIndexPath(), json, true));
+        Backup.LIST_CODEC.encodeStart(Json5Ops.INSTANCE, backups).ifSuccess(json -> {
+            try {
+                Json5Util.tryWrite(backupsIndexPath(), json);
+            } catch (IOException ex) {
+                LOGGER.error("can't write index file {}: {}", backupsIndexPath(), ex.getMessage());
+            }
+        });
 
         NeoForge.EVENT_BUS.post(new BackupEvent.Post(backup, error));
 

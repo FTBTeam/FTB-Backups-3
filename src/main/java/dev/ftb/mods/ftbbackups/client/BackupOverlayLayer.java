@@ -8,7 +8,7 @@ import dev.ftb.mods.ftblibrary.icon.Color4I;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
@@ -22,7 +22,7 @@ public enum BackupOverlayLayer implements GuiLayer {
     private int prevProgress;
 
     @Override
-    public void render(GuiGraphics guiGraphics, DeltaTracker deltaTracker) {
+    public void render(GuiGraphicsExtractor guiGraphics, DeltaTracker deltaTracker) {
         if (!FTBBackupsClientConfig.SHOW_OVERLAY.get() || BackupsClient.isDisabledOnThisServer()) {
             return;
         }
@@ -61,14 +61,14 @@ public enum BackupOverlayLayer implements GuiLayer {
         Color4IRenderer.INSTANCE.render(Color4I.rgba(0x80200020), guiGraphics, -2, -2, width + 4, height + 4);
         GuiHelper.drawHollowRect(guiGraphics, -2, -2, width + 4, height + 4, Color4I.rgba(0x80400040), false);
 
-        guiGraphics.drawString(font, line1, 2, 2, 0xFFFAF9F6, false);
+        guiGraphics.text(font, line1, 2, 2, 0xFFFAF9F6, false);
 
         int pw = (int) ((width - 4) * Mth.lerp(deltaTracker.getGameTimeDeltaTicks(), prevProgress, progress.current()) / progress.total());
         int sy = font.lineHeight + 4;
         guiGraphics.fill(2, sy - 1, width - 3, sy + progressBarHeight + 1, 0xC00060E0);
         guiGraphics.fill(3, sy, pw, sy + progressBarHeight, 0xC00040A0);
 
-        guiGraphics.drawString(font, line2, 14, 2 + font.lineHeight + 5, 0xFFFAF9F6, false);
+        guiGraphics.text(font, line2, 14, 2 + font.lineHeight + 5, 0xFFFAF9F6, false);
 
         guiGraphics.pose().popMatrix();
 
