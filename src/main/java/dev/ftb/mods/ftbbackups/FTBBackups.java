@@ -10,6 +10,7 @@ import dev.ftb.mods.ftbbackups.config.FTBBackupsServerConfig;
 import dev.ftb.mods.ftbbackups.net.FTBBackupsNetHandler;
 import dev.ftb.mods.ftbbackups.net.NotifyDisabledPacket;
 import dev.ftb.mods.ftblibrary.config.manager.ConfigManager;
+import net.minecraft.Util;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -105,7 +106,7 @@ public class FTBBackups {
     }
 
     public void levelTick(ServerTickEvent.Post event) {
-        Backups.getServerInstance().tick(event.getServer(), System.currentTimeMillis());
+        Backups.getServerInstance().tick(event.getServer(), Util.getEpochMillis());
     }
 
     public static boolean isDisabledByEnvironmentVar() {

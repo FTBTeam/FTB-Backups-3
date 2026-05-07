@@ -72,7 +72,7 @@ public interface FTBBackupsServerConfig {
             .comment("Maximum total size that is allowed in backups folder. Older backups will be deleted to free space for newer ones.");
 
     BooleanValue ONLY_IF_PLAYERS_ONLINE = CONFIG.addBoolean("only_if_players_online", true)
-            .comment("Only create backups when at least one player is online.");
+            .comment("Only create backups when at least one player is online, or has been online since the last backup was made.");
 
     BooleanValue FORCE_ON_SHUTDOWN = CONFIG.addBoolean("force_on_shutdown", false)
             .comment("Create a backup when server is stopped.");
