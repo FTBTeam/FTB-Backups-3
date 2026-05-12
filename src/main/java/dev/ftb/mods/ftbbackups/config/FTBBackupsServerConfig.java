@@ -60,7 +60,11 @@ public interface FTBBackupsServerConfig {
             );
 
     StringValue FOLDER = CONFIG.addString("folder", "")
-            .comment("Absolute path to backups folder. Default of \"\" means to use \"ftbackups3\" within the game instance folder.");
+            .comment("Absolute path to backups folder. Default of \"\" means to use \"ftbackups3\" within the game instance folder.",
+                    "Example valid paths:",
+                    "- Linux/Mac: \"/home/user/mc-backups\"",
+                    "- Windows: \"C:\\\\Backups\\\\Minecraft\"",
+                    "  (it may be necessary to use double backslashes here since the backslash is an escape character for Java strings");
 
     BooleanValue DISPLAY_FILE_SIZE = CONFIG.addBoolean("display_file_size", true)
             .comment("Broadcasts to all online players a \"(current size | total size)\" message when backup is done.");
