@@ -19,7 +19,7 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
-import net.neoforged.neoforge.event.server.ServerAboutToStartEvent;
+import net.neoforged.neoforge.event.server.ServerStartedEvent;
 import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 import net.neoforged.neoforge.event.server.ServerStoppingEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
@@ -46,7 +46,7 @@ public class FTBBackups {
                 true, FTBBackupsServerConfig::onConfigChanged);
         ConfigManager.getInstance().registerClientConfig(FTBBackupsClientConfig.CONFIG, MOD_ID + ".general");
 
-        NeoForge.EVENT_BUS.addListener(EventPriority.HIGH, this::serverAboutToStart);
+        NeoForge.EVENT_BUS.addListener(EventPriority.HIGH, this::serverStarted);
         NeoForge.EVENT_BUS.addListener(EventPriority.HIGH, this::serverStopping);
         NeoForge.EVENT_BUS.addListener(EventPriority.HIGH, this::serverStopped);
         NeoForge.EVENT_BUS.addListener(EventPriority.HIGH, this::playerLoggedOut);
@@ -56,7 +56,7 @@ public class FTBBackups {
         NeoForge.EVENT_BUS.addListener(this::registerCommands);
     }
 
-    public void serverAboutToStart(ServerAboutToStartEvent event) {
+    public void serverStarted(ServerStartedEvent event) {
         Backups.initServerInstance();
 
         NeoForge.EVENT_BUS.post(new RegisterArchivalPluginEvent(ArchivePluginManager.serverInstance()::register));
