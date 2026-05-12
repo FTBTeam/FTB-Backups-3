@@ -8,7 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 * FTB Backups 3 can now work as a client-only mod
-  * Network packets are now marked `optional()`, so clients with the mod installed can connect to servers without the mod installed
+* Network packets are now marked `optional()`, so clients with the mod installed can connect to servers without the mod installed
+
+### Fixed
+* Fixed a problem causing custom backup folder setting to sometimes get ignored
 
 ## [26.1.2.1]
 
