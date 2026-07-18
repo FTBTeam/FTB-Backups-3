@@ -20,6 +20,7 @@ public class RetentionRegistry {
         initialized = true;
         register(LatestRetentionRule.ID, LatestRetentionRule.CODEC);
         register(PeriodRetentionRule.ID, PeriodRetentionRule.CODEC);
+        register(MinimumAgeRule.ID, MinimumAgeRule.CODEC);
     }
 
     public void register(ResourceLocation id, Codec<? extends RetentionRule> codec) {

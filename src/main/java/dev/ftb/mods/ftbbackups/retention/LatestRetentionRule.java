@@ -25,7 +25,7 @@ public record LatestRetentionRule(int count) implements RetentionRule {
     }
 
     @Override
-    public Set<Backup> apply(Set<Backup> backups) {
+    public Set<Backup> computeToKeep(Set<Backup> backups) {
         return backups.stream()
                 .sorted(Comparator.comparing(Backup::time).reversed())
                 .limit(count)

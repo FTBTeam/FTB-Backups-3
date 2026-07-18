@@ -25,7 +25,7 @@ public class RetentionBasedCleanup {
 
         Set<Backup> backupsToKeep = new HashSet<>();
         for (RetentionRule rule : rules) {
-            backupsToKeep.addAll(rule.apply(allBackups));
+            backupsToKeep.addAll(rule.computeToKeep(allBackups));
         }
 
         System.out.println("Files to keep: " + backupsToKeep);

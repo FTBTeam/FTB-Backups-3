@@ -18,7 +18,7 @@ public interface RetentionRule {
      * @param backups the list of backup objects to apply the retention rule to
      * @return the set of backup objects that should be kept
      */
-    Set<Backup> apply(Set<Backup> backups);
+    Set<Backup> computeToKeep(Set<Backup> backups);
 
     Codec<? extends RetentionRule> codec();
 }

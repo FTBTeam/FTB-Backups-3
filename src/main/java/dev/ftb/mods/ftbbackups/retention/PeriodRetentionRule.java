@@ -11,6 +11,7 @@ import net.minecraft.resources.ResourceLocation;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
@@ -28,7 +29,7 @@ public record PeriodRetentionRule(Period period, int count) implements Retention
     }
 
     @Override
-    public Set<Backup> apply(Set<Backup> backups) {
+    public Set<Backup> computeToKeep(Set<Backup> backups) {
         var byPeriod = groupedByPeriod(backups);
 
         Set<Backup> toKeep = new HashSet<>();
@@ -54,7 +55,7 @@ public record PeriodRetentionRule(Period period, int count) implements Retention
         Map<String, List<Pair<LocalDateTime, Backup>>> grouped = new HashMap<>();
 
         for (Backup backup : backups) {
-            var timestamp = LocalDateTime.from(Instant.ofEpochMilli(backup.time()));
+            var timestamp = LocalDateTime.ofInstant(Instant.ofEpochMilli(backup.time()), ZoneId.systemDefault());
 
             // Determine the period number based on the specified period type
             String periodNumber = period.toKeyable(timestamp);
