@@ -1,6 +1,7 @@
 package dev.ftb.mods.ftbbackups.retention;
 
 import dev.ftb.mods.ftbbackups.FTBBackups;
+import dev.ftb.mods.ftbbackups.api.Backup;
 import dev.ftb.mods.ftbbackups.api.retention.RetentionRule;
 
 import com.mojang.serialization.Codec;
@@ -8,10 +9,9 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.Pair;
 import net.minecraft.resources.ResourceLocation;
 
-import java.nio.file.Path;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.WeekFields;
 import java.util.*;
 
 public record PeriodRetentionRule(Period period, int count) implements RetentionRule {
@@ -22,20 +22,17 @@ public record PeriodRetentionRule(Period period, int count) implements Retention
             Codec.INT.fieldOf("count").forGetter(PeriodRetentionRule::count)
     ).apply(instance, PeriodRetentionRule::new));
 
-    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd-HH-mm-ss");
-
     @Override
     public ResourceLocation id() {
         return ID;
     }
 
     @Override
-    public Set<Path> apply(Set<Path> backups) {
+    public Set<Backup> apply(Set<Backup> backups) {
         var byPeriod = groupedByPeriod(backups);
 
-        Set<Path> toKeep = new HashSet<>();
-        for (Map.Entry<Integer, List<Path>> byPeriodEntry : byPeriod.entrySet()) {
-            var backupsForPeriod = byPeriodEntry.getValue();
+        Set<Backup> toKeep = new HashSet<>();
+        for (List<Backup> backupsForPeriod : byPeriod.values()) {
             for (int i = 0; i < Math.min(count, backupsForPeriod.size()); i++) {
                 toKeep.add(backupsForPeriod.get(i));
             }
@@ -53,14 +50,14 @@ public record PeriodRetentionRule(Period period, int count) implements Retention
      * Groups the given files by the specified period and returns a map where the key is the period number and the value
      * is the latest backup file name for that period.
      */
-    private Map<Integer, List<Path>> groupedByPeriod(Set<Path> backups) {
-        Map<Integer, List<Pair<LocalDateTime, Path>>> grouped = new HashMap<>();
+    private Map<String, List<Backup>> groupedByPeriod(Set<Backup> backups) {
+        Map<String, List<Pair<LocalDateTime, Backup>>> grouped = new HashMap<>();
 
-        for (Path backup : backups) {
-            var timestamp = parseTimestampFromFile(backup.getFileName().toString());
+        for (Backup backup : backups) {
+            var timestamp = LocalDateTime.from(Instant.ofEpochMilli(backup.time()));
 
             // Determine the period number based on the specified period type
-            int periodNumber = period.toKeyable(timestamp);
+            String periodNumber = period.toKeyable(timestamp);
             grouped.computeIfAbsent(periodNumber, k -> new ArrayList<>()).add(Pair.of(timestamp, backup));
         }
 
@@ -72,27 +69,22 @@ public record PeriodRetentionRule(Period period, int count) implements Retention
                 }, HashMap::putAll);
     }
 
-    public static LocalDateTime parseTimestampFromFile(String backup) {
-        // Converts: 2026-04-08-17-54-53.extension to a date;
-        String[] parts = backup.split("\\.");
-        if (parts.length < 2) {
-            throw new IllegalArgumentException("Invalid backup file name: " + backup);
-        }
-
-        try {
-            return FORMATTER.parse(parts[0], LocalDateTime::from);
-        } catch (Exception e) {
-            throw new IllegalArgumentException("Invalid timestamp in backup file name: " + backup, e);
-        }
-    }
-
     public enum Period {
-        DAILY,
-        WEEKLY,
-        MONTHLY,
-        YEARLY;
+        DAILY(DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+        WEEKLY(DateTimeFormatter.ofPattern("YYYY-ww")),
+        MONTHLY(DateTimeFormatter.ofPattern("yyyy-MM")),
+        YEARLY(DateTimeFormatter.ofPattern("yyyy"));
 
         private static final List<Period> VALUES = List.of(Period.values());
+
+        /**
+         * Formatter that provides a string representation of the period in a year/month/day unique format to avoid overlaps
+         */
+        private final DateTimeFormatter formatter;
+
+        Period(DateTimeFormatter formatter) {
+            this.formatter = formatter;
+        }
 
         public static Period fromString(String period) {
             return VALUES.stream()
@@ -102,19 +94,10 @@ public record PeriodRetentionRule(Period period, int count) implements Retention
         }
 
         /**
-         * Converts a LocalDateTime to an integer that can be used as a key for grouping backups by period. The year and
-         * other relevant data is merged into the int to ensure uniqueness across years.
-         *
-         * @param timestamp the LocalDateTime to convert
-         * @return an integer representing the period key
+         * Returns a string representation of the period that can be used as a key for grouping backups.
          */
-        public int toKeyable(LocalDateTime timestamp) {
-            return switch (this) {
-                case DAILY -> timestamp.getYear() * 1000 + timestamp.getDayOfYear();
-                case WEEKLY -> timestamp.get(WeekFields.ISO.weekBasedYear()) * 100 + timestamp.get(WeekFields.ISO.weekOfWeekBasedYear());
-                case MONTHLY -> timestamp.getYear() * 100 + timestamp.getMonthValue();
-                case YEARLY -> timestamp.getYear();
-            };
+        public String toKeyable(LocalDateTime timestamp) {
+            return this.formatter.format(timestamp);
         }
 
         public String toString() {

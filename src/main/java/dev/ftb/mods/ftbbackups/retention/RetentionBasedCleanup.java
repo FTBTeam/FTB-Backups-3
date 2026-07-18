@@ -1,5 +1,6 @@
 package dev.ftb.mods.ftbbackups.retention;
 
+import dev.ftb.mods.ftbbackups.api.Backup;
 import dev.ftb.mods.ftbbackups.api.retention.RetentionRule;
 import dev.ftb.mods.ftbbackups.config.FTBBackupsServerConfig;
 
@@ -15,19 +16,19 @@ public class RetentionBasedCleanup {
      * @param backupPath the path to the backup directory
      */
     public void apply(Path backupPath) {
-        var rules = FTBBackupsServerConfig.RETENTION_POLICIES.get();
+        var rules = FTBBackupsServerConfig.RETENTION_POLICIES.get().values();
         if (rules.isEmpty()) {
             return; // No retention rules means we don't delete anything
         }
 
-        Set<Path> allBackups = Set.of(); // This should be populated with the actual backup files in the backupPath
+        Set<Backup> allBackups = Set.of(); // This should be populated with the actual backup files in the backupPath
 
-        Set<Path> filesToKeep = new HashSet<>();
+        Set<Backup> backupsToKeep = new HashSet<>();
         for (RetentionRule rule : rules) {
-            filesToKeep.addAll(rule.apply(allBackups));
+            backupsToKeep.addAll(rule.apply(allBackups));
         }
 
-        System.out.println("Files to keep: " + filesToKeep);
+        System.out.println("Files to keep: " + backupsToKeep);
         // TOOD: Implement the logic to delete files that are not in filesToKeep from backupPath
     }
 }
