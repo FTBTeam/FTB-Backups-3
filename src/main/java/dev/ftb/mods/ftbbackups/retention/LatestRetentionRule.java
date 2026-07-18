@@ -8,7 +8,11 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.resources.ResourceLocation;
 
 import java.nio.file.Path;
+import java.util.Comparator;
 import java.util.Set;
+import java.util.stream.Collectors;
+
+import static dev.ftb.mods.ftbbackups.retention.PeriodRetentionRule.parseTimestampFromFile;
 
 public record LatestRetentionRule(int count) implements RetentionRule {
     public static final ResourceLocation ID = FTBBackups.id("latest");
@@ -24,7 +28,10 @@ public record LatestRetentionRule(int count) implements RetentionRule {
 
     @Override
     public Set<Path> apply(Set<Path> backups) {
-        return Set.of();
+        return backups.stream()
+                .sorted(Comparator.comparing((Path p) -> parseTimestampFromFile(p.getFileName().toString())).reversed())
+                .limit(count)
+                .collect(Collectors.toSet());
     }
 
     @Override

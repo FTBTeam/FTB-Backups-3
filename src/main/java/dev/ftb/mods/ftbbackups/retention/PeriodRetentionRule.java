@@ -17,7 +17,8 @@ import java.util.*;
 public record PeriodRetentionRule(Period period, int count) implements RetentionRule {
     public static final ResourceLocation ID = FTBBackups.id("period");
     public static final Codec<PeriodRetentionRule> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            Codec.STRING.fieldOf("period").forGetter(rule -> rule.period.toString()),
+            // TODO: A swear there is a codec for enums.
+            Codec.STRING.xmap(Period::fromString, Period::toString).fieldOf("period").forGetter(PeriodRetentionRule::period),
             Codec.INT.fieldOf("count").forGetter(PeriodRetentionRule::count)
     ).apply(instance, PeriodRetentionRule::new));
 
@@ -43,6 +44,11 @@ public record PeriodRetentionRule(Period period, int count) implements Retention
         return toKeep;
     }
 
+    @Override
+    public Codec<? extends RetentionRule> codec() {
+        return CODEC;
+    }
+
     /**
      * Groups the given files by the specified period and returns a map where the key is the period number and the value
      * is the latest backup file name for that period.
@@ -54,13 +60,7 @@ public record PeriodRetentionRule(Period period, int count) implements Retention
             var timestamp = parseTimestampFromFile(backup.getFileName().toString());
 
             // Determine the period number based on the specified period type
-            int periodNumber = switch (period) {
-                case DAILY -> timestamp.getDayOfYear();
-                case WEEKLY -> timestamp.get(WeekFields.ISO.weekOfWeekBasedYear());
-                case MONTHLY -> timestamp.getMonthValue();
-                case YEARLY -> timestamp.getYear();
-            };
-
+            int periodNumber = period.toKeyable(timestamp);
             grouped.computeIfAbsent(periodNumber, k -> new ArrayList<>()).add(Pair.of(timestamp, backup));
         }
 
@@ -72,7 +72,7 @@ public record PeriodRetentionRule(Period period, int count) implements Retention
                 }, HashMap::putAll);
     }
 
-    private LocalDateTime parseTimestampFromFile(String backup) {
+    public static LocalDateTime parseTimestampFromFile(String backup) {
         // Converts: 2026-04-08-17-54-53.extension to a date;
         String[] parts = backup.split("\\.");
         if (parts.length < 2) {
@@ -99,6 +99,22 @@ public record PeriodRetentionRule(Period period, int count) implements Retention
                     .filter(p -> p.toString().equalsIgnoreCase(period))
                     .findFirst()
                     .orElseThrow(() -> new IllegalArgumentException("Invalid period: " + period));
+        }
+
+        /**
+         * Converts a LocalDateTime to an integer that can be used as a key for grouping backups by period. The year and
+         * other relevant data is merged into the int to ensure uniqueness across years.
+         *
+         * @param timestamp the LocalDateTime to convert
+         * @return an integer representing the period key
+         */
+        public int toKeyable(LocalDateTime timestamp) {
+            return switch (this) {
+                case DAILY -> timestamp.getYear() * 1000 + timestamp.getDayOfYear();
+                case WEEKLY -> timestamp.get(WeekFields.ISO.weekBasedYear()) * 100 + timestamp.get(WeekFields.ISO.weekOfWeekBasedYear());
+                case MONTHLY -> timestamp.getYear() * 100 + timestamp.getMonthValue();
+                case YEARLY -> timestamp.getYear();
+            };
         }
 
         public String toString() {
