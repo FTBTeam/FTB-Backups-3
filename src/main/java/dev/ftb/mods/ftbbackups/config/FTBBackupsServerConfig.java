@@ -4,7 +4,9 @@ package dev.ftb.mods.ftbbackups.config;
 import dev.ftb.mods.ftbbackups.BackupUtils;
 import dev.ftb.mods.ftbbackups.Backups;
 import dev.ftb.mods.ftbbackups.FTBBackups;
+import dev.ftb.mods.ftbbackups.api.retention.RetentionRule;
 import dev.ftb.mods.ftbbackups.archival.ZipArchiver;
+import dev.ftb.mods.ftbbackups.retention.PeriodRetentionRule;
 import dev.ftb.mods.ftblibrary.snbt.config.*;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.fml.loading.FMLPaths;
@@ -15,6 +17,7 @@ import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public interface FTBBackupsServerConfig {
@@ -39,7 +42,21 @@ public interface FTBBackupsServerConfig {
     IntValue BACKUPS_TO_KEEP = CONFIG.addInt("backups_to_keep", 12, 0, 32000)
             .comment("The number of backup files to keep.",
                     "More backups = more space used",
-                    "0 - Infinite"
+                    "0 - Infinite",
+                    "This setting is ignored if \"use_retention_policies\" is set to true."
+            );
+
+    BooleanValue USE_RETENTION_POLICIES = CONFIG.addBoolean("use_retention_policies", false)
+            .comment("If true, retention policies will be used to determine which backups to keep and which to delete.",
+                    "If false, the \"backups_to_keep\" setting will be used instead."
+            );
+
+    RetentionRuleListValue RETENTION_POLICIES = CONFIG.add(new RetentionRuleListValue(CONFIG, "retention_policies", new HashMap<>()))
+            .comment("Retention policies to determine which backups to keep and which to delete.",
+                    "Builtin retention policies are \"ftbbackups:latest\" (keep the latest N backups) and \"ftbbackups:period\" (keep backups for a certain period of time).",
+                    "ftbbackups:latest is configured by specifying the number of backups to keep, e.g. {\"type\": \"ftbbackups:latest\", \"count\": 5} will keep the latest 5 backups.",
+                    "ftbbackups:period is configured by specifying the period and the number of backups to keep, e.g. {\"type\": \"ftbbackups:period\", \"period\": \"daily\", \"count\": 7} will keep the latest backup for each of the last 7 days.",
+                    "    Valid periods are: "+ String.join(", ", PeriodRetentionRule.Period.getAllPeriods())
             );
 
     IntValue BACKUP_TIMER_MINUTES = CONFIG.addInt("backup_timer", 120, 1, 43800)
