@@ -1,5 +1,6 @@
 package dev.ftb.mods.ftbbackups.api.retention;
 
+import com.mojang.serialization.Codec;
 import net.minecraft.resources.ResourceLocation;
 
 import java.nio.file.Path;
@@ -19,5 +20,5 @@ public interface RetentionRule {
      */
     Set<Path> apply(Set<Path> backups);
 
-    String asString();
+    Codec<? extends RetentionRule> codec();
 }

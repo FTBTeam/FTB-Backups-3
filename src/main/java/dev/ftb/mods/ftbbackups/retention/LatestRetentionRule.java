@@ -3,6 +3,8 @@ package dev.ftb.mods.ftbbackups.retention;
 import dev.ftb.mods.ftbbackups.FTBBackups;
 import dev.ftb.mods.ftbbackups.api.retention.RetentionRule;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.resources.ResourceLocation;
 
 import java.nio.file.Path;
@@ -10,6 +12,10 @@ import java.util.Set;
 
 public record LatestRetentionRule(int count) implements RetentionRule {
     public static final ResourceLocation ID = FTBBackups.id("latest");
+
+    public static final Codec<LatestRetentionRule> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+            Codec.INT.fieldOf("count").forGetter(LatestRetentionRule::count)
+    ).apply(instance, LatestRetentionRule::new));
 
     @Override
     public ResourceLocation id() {
@@ -22,20 +28,7 @@ public record LatestRetentionRule(int count) implements RetentionRule {
     }
 
     @Override
-    public String asString() {
-        return "latest: " + count;
-    }
-
-    public static LatestRetentionRule parse(String... args) {
-        if (args.length != 1) {
-            throw new IllegalArgumentException("Invalid number of arguments for latest retention rule. Expected 1, got " + args.length);
-        }
-
-        try {
-            int count = Integer.parseInt(args[0]);
-            return new LatestRetentionRule(count);
-        } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("Invalid count for latest retention rule: " + args[0]);
-        }
+    public Codec<? extends RetentionRule> codec() {
+        return CODEC;
     }
 }

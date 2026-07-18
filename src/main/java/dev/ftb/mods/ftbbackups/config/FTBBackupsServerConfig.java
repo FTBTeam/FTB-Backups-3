@@ -17,6 +17,7 @@ import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public interface FTBBackupsServerConfig {
@@ -50,12 +51,12 @@ public interface FTBBackupsServerConfig {
                     "If false, the \"backups_to_keep\" setting will be used instead."
             );
 
-    RetentionRuleListValue RETENTION_POLICIES = CONFIG.add(new RetentionRuleListValue(CONFIG, "retention_policies", new ArrayList<>()))
+    RetentionRuleListValue RETENTION_POLICIES = CONFIG.add(new RetentionRuleListValue(CONFIG, "retention_policies", new HashMap<>()))
             .comment("Retention policies to determine which backups to keep and which to delete.",
-                    "Each policy is a string in the format: <resource:location> <...args>",
-                    "Builtin policies are:",
-                    "  - \"ftbbackups:latest 5\" - keep the latest 5 backups",
-                    "  - \"ftbbackups:period daily 7\" - keep the latest backup for each day, up to 7 days, valid periods are: " + String.join(", ", PeriodRetentionRule.Period.getAllPeriods())
+                    "Builtin retention policies are \"ftbbackups:latest\" (keep the latest N backups) and \"ftbbackups:period\" (keep backups for a certain period of time).",
+                    "ftbbackups:latest is configured by specifying the number of backups to keep, e.g. {\"type\": \"ftbbackups:latest\", \"count\": 5} will keep the latest 5 backups.",
+                    "ftbbackups:period is configured by specifying the period and the number of backups to keep, e.g. {\"type\": \"ftbbackups:period\", \"period\": \"daily\", \"count\": 7} will keep the latest backup for each of the last 7 days.",
+                    "    Valid periods are: "+ String.join(", ", PeriodRetentionRule.Period.getAllPeriods())
             );
 
     IntValue BACKUP_TIMER_MINUTES = CONFIG.addInt("backup_timer", 120, 1, 43800)

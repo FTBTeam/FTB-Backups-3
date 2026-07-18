@@ -3,6 +3,8 @@ package dev.ftb.mods.ftbbackups.retention;
 import dev.ftb.mods.ftbbackups.FTBBackups;
 import dev.ftb.mods.ftbbackups.api.retention.RetentionRule;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.Pair;
 import net.minecraft.resources.ResourceLocation;
 
@@ -14,6 +16,11 @@ import java.util.*;
 
 public record PeriodRetentionRule(Period period, int count) implements RetentionRule {
     public static final ResourceLocation ID = FTBBackups.id("period");
+    public static final Codec<PeriodRetentionRule> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+            Codec.STRING.fieldOf("period").forGetter(rule -> rule.period.toString()),
+            Codec.INT.fieldOf("count").forGetter(PeriodRetentionRule::count)
+    ).apply(instance, PeriodRetentionRule::new));
+
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd-HH-mm-ss");
 
     @Override
@@ -77,24 +84,6 @@ public record PeriodRetentionRule(Period period, int count) implements Retention
         } catch (Exception e) {
             throw new IllegalArgumentException("Invalid timestamp in backup file name: " + backup, e);
         }
-    }
-
-    @Override
-    public String asString() {
-        return "period: " + period + " " + count;
-    }
-
-    public static RetentionRule parse(String... args) {
-        if (args.length < 1 || args.length > 2) {
-            throw new IllegalArgumentException("Invalid number of arguments for period retention rule. Expected 1 or 2, got " + args.length);
-        }
-
-        String period = args[0].toLowerCase();
-        Period periodEnum = Period.fromString(period);
-
-        // If no count is provided, default to 1
-        int count = args.length == 2 ? Integer.parseInt(args[1]) : 1;
-        return new PeriodRetentionRule(periodEnum, count);
     }
 
     public enum Period {
