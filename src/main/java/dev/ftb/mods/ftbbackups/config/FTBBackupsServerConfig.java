@@ -4,7 +4,9 @@ package dev.ftb.mods.ftbbackups.config;
 import dev.ftb.mods.ftbbackups.BackupUtils;
 import dev.ftb.mods.ftbbackups.Backups;
 import dev.ftb.mods.ftbbackups.FTBBackups;
+import dev.ftb.mods.ftbbackups.api.retention.RetentionRule;
 import dev.ftb.mods.ftbbackups.archival.ZipArchiver;
+import dev.ftb.mods.ftbbackups.retention.PeriodRetentionRule;
 import dev.ftb.mods.ftblibrary.snbt.config.*;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.fml.loading.FMLPaths;
@@ -39,7 +41,21 @@ public interface FTBBackupsServerConfig {
     IntValue BACKUPS_TO_KEEP = CONFIG.addInt("backups_to_keep", 12, 0, 32000)
             .comment("The number of backup files to keep.",
                     "More backups = more space used",
-                    "0 - Infinite"
+                    "0 - Infinite",
+                    "This setting is ignored if \"use_retention_policies\" is set to true."
+            );
+
+    BooleanValue USE_RETENTION_POLICIES = CONFIG.addBoolean("use_retention_policies", false)
+            .comment("If true, retention policies will be used to determine which backups to keep and which to delete.",
+                    "If false, the \"backups_to_keep\" setting will be used instead."
+            );
+
+    RetentionRuleListValue RETENTION_POLICIES = CONFIG.add(new RetentionRuleListValue(CONFIG, "retention_policies", new ArrayList<>()))
+            .comment("Retention policies to determine which backups to keep and which to delete.",
+                    "Each policy is a string in the format: <resource:location> <...args>",
+                    "Builtin policies are:",
+                    "  - \"ftbbackups:latest 5\" - keep the latest 5 backups",
+                    "  - \"ftbbackups:period daily 7\" - keep the latest backup for each day, up to 7 days, valid periods are: " + String.join(", ", PeriodRetentionRule.Period.getAllPeriods())
             );
 
     IntValue BACKUP_TIMER_MINUTES = CONFIG.addInt("backup_timer", 120, 1, 43800)
