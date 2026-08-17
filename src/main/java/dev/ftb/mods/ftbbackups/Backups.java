@@ -105,7 +105,7 @@ public class Backups {
         Path backupsIndex = backupsIndexPath();
         if (Files.exists(backupsIndex)) {
             try {
-                var json = Json5Util.tryRead(backupsIndex, Json5Array.class);
+                var json = Json5Util.load(backupsIndex, Json5Array.class);
                 Backup.LIST_CODEC.parse(Json5Ops.INSTANCE, json)
                         .resultOrPartial(err -> LOGGER.warn("can't parse backups index {}: {}", backupsIndex, err))
                         .ifPresent(backups::addAll);
@@ -114,7 +114,7 @@ public class Backups {
             }
         } else {
             try {
-                Json5Util.tryWrite(backupsIndex, new Json5Array());
+                Json5Util.save(backupsIndex, new Json5Array());
                 LOGGER.info("created new empty backups index {}", backupsIndex);
             } catch (IOException ex) {
                 LOGGER.error("can't write {}: {}", backupsIndex, ex.getMessage());
@@ -264,7 +264,7 @@ public class Backups {
 
         Backup.LIST_CODEC.encodeStart(Json5Ops.INSTANCE, backups).ifSuccess(json -> {
             try {
-                Json5Util.tryWrite(backupsIndexPath(), json);
+                Json5Util.save(backupsIndexPath(), json);
             } catch (IOException ex) {
                 LOGGER.error("can't write index file {}: {}", backupsIndexPath(), ex.getMessage());
             }
