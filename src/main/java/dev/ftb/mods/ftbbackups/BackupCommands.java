@@ -136,9 +136,7 @@ public class BackupCommands {
         return Command.SINGLE_SUCCESS;
     }
 
-    /**
-     * @deprecated This seems like a hack around bigger issues
-     */
+    /// @deprecated This seems like a hack around bigger issues
     @Deprecated(forRemoval = true, since = "21.1.0")
     private static int resetState(CommandSourceStack source) {
         source.getServer().getAllLevels().forEach(level -> {

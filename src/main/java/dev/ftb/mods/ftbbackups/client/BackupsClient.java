@@ -6,7 +6,6 @@ import dev.ftb.mods.ftblibrary.sidebar.SidebarButtonManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.worldselection.SelectWorldScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -19,8 +18,6 @@ import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
 import net.neoforged.neoforge.client.event.ScreenEvent;
 import net.neoforged.neoforge.common.NeoForge;
-
-import java.util.function.Function;
 
 @Mod(value = FTBBackups.MOD_ID, dist = Dist.CLIENT)
 @EventBusSubscriber(modid = FTBBackups.MOD_ID, value = Dist.CLIENT)
@@ -43,14 +40,14 @@ public class BackupsClient {
     }
 
     private static void addRestoreButton(ScreenEvent.Init.Post event) {
-        if (event.getScreen() instanceof SelectWorldScreen s) {
+        if (event.getScreen() instanceof SelectWorldScreen sws) {
             Backups backups = Backups.getClientInstance();
             if (!backups.backups().isEmpty()) {
                 Component btnLabel = Component.translatable("ftbbackups3.gui.restore").append("...");
                 Component title = Component.translatable("ftbbackups3.gui.restore");
-                int w = s.getMinecraft().font.width(btnLabel) + 20;
-                event.addListener(Button.builder(btnLabel, _ -> Minecraft.getInstance().setScreen(new RestoreBackupScreen(s, title)))
-                        .bounds(s.width - w - 10, 22, w, 20)
+                int w = sws.getMinecraft().font.width(btnLabel) + 20;
+                event.addListener(Button.builder(btnLabel, _ -> Minecraft.getInstance().setScreen(new RestoreBackupScreen(sws, title)))
+                        .bounds(sws.width - w - 10, 22, w, 20)
                         .tooltip(Tooltip.create(Component.translatable("ftbbackups3.gui.restore.tooltip")))
                         .build(RestoreButton::new)
                 );

@@ -277,17 +277,15 @@ public class Backups {
         }
     }
 
-    /**
-     * Scan the instance, gathering files which will be added to the backup archive
-     * <ul>
-     *     <li>All files in the instance's world directory (world/ for dedicated server, saves/{worldname} for SSP</li>
-     *     <li>All extra files found the "extra_files" config setting (must be relative to instance dir)</li>
-     *     <li>Any extra files added by listeners of {@code BackupEvent.Pre}</li>
-     * </ul>
-     * @param server the server
-     * @return a map of absolute filepath -> string path of location within the archive
-     * @throws IOException if any file-related problems occur
-     */
+    /// Scan the instance, gathering files which will be added to the backup archive
+    ///
+    ///   - All files in the instance's world directory (world/ for dedicated server, saves/{worldname} for SSP
+    ///   - All extra files found the "extra\_files" config setting (must be relative to instance dir)
+    ///   - Any extra files added by listeners of `BackupEvent.Pre`
+    ///
+    /// @param server the server
+    /// @return a map of absolute filepath -> string path of location within the archive
+    /// @throws IOException if any file-related problems occur
     private Map<Path,String> gatherFiles(MinecraftServer server) throws IOException {
         Map<Path, String> res = new LinkedHashMap<>();
 
@@ -336,12 +334,10 @@ public class Backups {
         return FTBBackupsServerConfig.EXCLUSION_MATCHERS.get().stream().noneMatch(m -> m.matches(file.getFileName()));
     }
 
-    /**
-     * Check if any existing backup archives need to be purged, based on the "backups_to_keep" and "max_total_size"
-     * config settings.
-     *
-     * @param fileSize the file size of the archive about to be created
-     */
+    /// Check if any existing backup archives need to be purged, based on the "backups\_to\_keep" and "max\_total\_size"
+    /// config settings.
+    ///
+    /// @param fileSize the file size of the archive about to be created
     private void doArchiveCleanup(long fileSize) {
         if (!backups.isEmpty()) {
             backups.sort(null);
