@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 * Fixed a problem causing custom backup folder setting to sometimes get ignored
+* Fixed "Restore World..." button not staying in corner on a screen resize
 
 ## [26.1.2.1]
 
