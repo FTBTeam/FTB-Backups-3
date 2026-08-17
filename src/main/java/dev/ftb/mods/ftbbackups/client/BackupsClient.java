@@ -59,11 +59,10 @@ public class BackupsClient {
     }
 
     public static void repositionRestoreButton() {
-        Screen screen = Minecraft.getInstance().screen;
-        if (screen != null) {
-            screen.children().forEach(w -> {
+        if (Minecraft.getInstance().screen instanceof SelectWorldScreen sws) {
+            sws.children().forEach(w -> {
                 if (w instanceof RestoreButton btn) {
-                    btn.setPosition(screen.width - btn.getWidth() - 10, 22);
+                    btn.setPosition(sws.width - btn.getWidth() - 10, 22);
                 }
             });
         }
