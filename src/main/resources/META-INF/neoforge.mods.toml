@@ -13,6 +13,9 @@ description = '''
 Creates backups of your world
 '''
 
+[[mixins]]
+config="${mod_id}.mixins.json"
+
 [[dependencies.ftbbackups3]]
 modId = "neoforge"
 mandatory = true

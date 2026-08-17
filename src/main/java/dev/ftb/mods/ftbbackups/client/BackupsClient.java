@@ -6,6 +6,7 @@ import dev.ftb.mods.ftblibrary.sidebar.SidebarButtonManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.worldselection.SelectWorldScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -18,6 +19,8 @@ import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
 import net.neoforged.neoforge.client.event.ScreenEvent;
 import net.neoforged.neoforge.common.NeoForge;
+
+import java.util.function.Function;
 
 @Mod(value = FTBBackups.MOD_ID, dist = Dist.CLIENT)
 @EventBusSubscriber(modid = FTBBackups.MOD_ID, value = Dist.CLIENT)
@@ -49,8 +52,20 @@ public class BackupsClient {
                 event.addListener(Button.builder(btnLabel, _ -> Minecraft.getInstance().setScreen(new RestoreBackupScreen(s, title)))
                         .bounds(s.width - w - 10, 22, w, 20)
                         .tooltip(Tooltip.create(Component.translatable("ftbbackups3.gui.restore.tooltip")))
-                        .build());
+                        .build(RestoreButton::new)
+                );
             }
+        }
+    }
+
+    public static void repositionRestoreButton() {
+        Screen screen = Minecraft.getInstance().screen;
+        if (screen != null) {
+            screen.children().forEach(w -> {
+                if (w instanceof RestoreButton btn) {
+                    btn.setPosition(screen.width - btn.getWidth() - 10, 22);
+                }
+            });
         }
     }
 
