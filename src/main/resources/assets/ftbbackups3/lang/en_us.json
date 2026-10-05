@@ -11,7 +11,7 @@
   "ftbbackups3.general.compression_level": "Compression Level",
   "ftbbackups3.general.compression_level.tooltip": "File compression level for backups\n9 = maximum compression\n1 = minimum compression\n0 = no compression at all",
   "ftbbackups3.general.folder": "Backup Folder",
-  "ftbbackups3.general.folder.tooltip": "If not empty, an absolute path to the backup folder\nIf empty, backups are placed in the \"ftbbackups3\" folder in your game instance",
+  "ftbbackups3.general.folder.tooltip": "If not empty, an absolute path to the backup folder\nIf empty, backups are placed in the \"ftbbackups3\" folder in your game instance\nExample valid paths:\n- Linux/Mac: \"/home/user/mc-backups\"\n- Windows: \"C:\\\\Backups\\\\Minecraft\"\n  (it may be necessary to use double backslashes here)",
   "ftbbackups3.general.display_file_size": "Display File Size",
   "ftbbackups3.general.display_file_size.tooltip": "When true (and \"Run Silently\" is false), also display backed-up file size to players",
   "ftbbackups3.general.extra_files": "Extra Files",

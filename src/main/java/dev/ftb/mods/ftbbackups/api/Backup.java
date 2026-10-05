@@ -11,17 +11,15 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
-/**
- * Holds information about one specific backup.
- *
- * @param time time the backup was created (milliseconds since the epoch)
- * @param archivalPlugin the archival plugin used to create this backup
- * @param fileId name of the backup on disk, relative to the backup directory defined in config (could be a file or a directory)
- * @param worldName human-readable name of the world that is backed up
- * @param index a monotonically increasing numeric index
- * @param success true if the backup succeeded, false if there were any problems
- * @param size nominal size of the backup in bytes
- */
+/// Holds information about one specific backup.
+///
+/// @param time time the backup was created (milliseconds since the epoch)
+/// @param archivalPlugin the archival plugin used to create this backup
+/// @param fileId name of the backup on disk, relative to the backup directory defined in config (could be a file or a directory)
+/// @param worldName human-readable name of the world that is backed up
+/// @param index a monotonically increasing numeric index
+/// @param success true if the backup succeeded, false if there were any problems
+/// @param size nominal size of the backup in bytes
 public record Backup(long time, Identifier archivalPlugin, String fileId, String worldName, int index, boolean success, long size, int fileCount) implements Comparable<Backup> {
     public static final Codec<Backup> CODEC = RecordCodecBuilder.create(builder -> builder.group(
             Codec.LONG.fieldOf("time").forGetter(Backup::time),

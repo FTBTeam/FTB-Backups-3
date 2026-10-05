@@ -40,17 +40,28 @@ public class BackupsClient {
     }
 
     private static void addRestoreButton(ScreenEvent.Init.Post event) {
-        if (event.getScreen() instanceof SelectWorldScreen s) {
+        if (event.getScreen() instanceof SelectWorldScreen sws) {
             Backups backups = Backups.getClientInstance();
             if (!backups.backups().isEmpty()) {
                 Component btnLabel = Component.translatable("ftbbackups3.gui.restore").append("...");
                 Component title = Component.translatable("ftbbackups3.gui.restore");
-                int w = s.getMinecraft().font.width(btnLabel) + 20;
-                event.addListener(Button.builder(btnLabel, _ -> Minecraft.getInstance().setScreen(new RestoreBackupScreen(s, title)))
-                        .bounds(s.width - w - 10, 22, w, 20)
+                int w = sws.getMinecraft().font.width(btnLabel) + 20;
+                event.addListener(Button.builder(btnLabel, _ -> Minecraft.getInstance().setScreen(new RestoreBackupScreen(sws, title)))
+                        .bounds(sws.width - w - 10, 22, w, 20)
                         .tooltip(Tooltip.create(Component.translatable("ftbbackups3.gui.restore.tooltip")))
-                        .build());
+                        .build(RestoreButton::new)
+                );
             }
+        }
+    }
+
+    public static void repositionRestoreButton() {
+        if (Minecraft.getInstance().screen instanceof SelectWorldScreen sws) {
+            sws.children().forEach(w -> {
+                if (w instanceof RestoreButton btn) {
+                    btn.setPosition(sws.width - btn.getWidth() - 10, 22);
+                }
+            });
         }
     }
 
