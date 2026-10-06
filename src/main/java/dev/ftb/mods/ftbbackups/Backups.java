@@ -335,14 +335,14 @@ public class Backups {
     }
 
     /// Check if any existing backup archives need to be purged, based on the "backups\_to\_keep" and "max\_total\_size"
-    /// config settings.
+    /// config settings. Called before a new backup is created.
     ///
     /// @param fileSize the file size of the archive about to be created
     private void doArchiveCleanup(long fileSize) {
         if (!backups.isEmpty()) {
             backups.sort(null);
 
-            int backupsToKeep = FTBBackupsServerConfig.BACKUPS_TO_KEEP.get() - 1;
+            int backupsToKeep = FTBBackupsServerConfig.BACKUPS_TO_KEEP.get();
             if (backupsToKeep > 0 && backups.size() > backupsToKeep) {
                 while (backups.size() > backupsToKeep) {
                     Backup backup = backups.removeFirst();
