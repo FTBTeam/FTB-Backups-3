@@ -83,7 +83,7 @@ public class RestoreBackupScreen extends Screen {
         BackupsList.Entry selected = backupsList.getSelected();
 
         if (selected != null) {
-            minecraft.setScreen(new ConfirmScreen(confirmed -> doRestore(confirmed, selected),
+            minecraft.gui.setScreen(new ConfirmScreen(confirmed -> doRestore(confirmed, selected),
                     Component.translatable("ftbbackups3.gui.confirm_restore", selected.backup.worldName(), selected.backup.fileId()),
                     Component.translatable("ftbbackups3.gui.confirm_restore.line_2"))
             );
@@ -91,7 +91,7 @@ public class RestoreBackupScreen extends Screen {
     }
 
     private void doRestore(boolean confirmed, BackupsList.Entry selected) {
-        minecraft.setScreen(this);
+        minecraft.gui.setScreen(this);
 
         if (confirmed) {
             Path backupsFolder = FTBBackupsServerConfig.getBackupFolder();
@@ -137,7 +137,7 @@ public class RestoreBackupScreen extends Screen {
 
     @Override
     public void onClose() {
-        minecraft.setScreen(prevScreen);
+        minecraft.gui.setScreen(prevScreen);
     }
 
     @Override

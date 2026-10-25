@@ -46,7 +46,7 @@ public class BackupsClient {
                 Component btnLabel = Component.translatable("ftbbackups3.gui.restore").append("...");
                 Component title = Component.translatable("ftbbackups3.gui.restore");
                 int w = sws.getMinecraft().font.width(btnLabel) + 20;
-                event.addListener(Button.builder(btnLabel, _ -> Minecraft.getInstance().setScreen(new RestoreBackupScreen(sws, title)))
+                event.addListener(Button.builder(btnLabel, _ -> Minecraft.getInstance().gui.setScreen(new RestoreBackupScreen(sws, title)))
                         .bounds(sws.width - w - 10, 22, w, 20)
                         .tooltip(Tooltip.create(Component.translatable("ftbbackups3.gui.restore.tooltip")))
                         .build(RestoreButton::new)
@@ -56,7 +56,7 @@ public class BackupsClient {
     }
 
     public static void repositionRestoreButton() {
-        if (Minecraft.getInstance().screen instanceof SelectWorldScreen sws) {
+        if (Minecraft.getInstance().gui.screen() instanceof SelectWorldScreen sws) {
             sws.children().forEach(w -> {
                 if (w instanceof RestoreButton btn) {
                     btn.setPosition(sws.width - btn.getWidth() - 10, 22);
