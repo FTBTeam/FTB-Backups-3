@@ -60,6 +60,7 @@ public interface FTBBackupsServerConfig {
             );
 
     StringValue FOLDER = CONFIG.addString("folder", "")
+            .fromFileOnly()
             .comment("Absolute path to backups folder. Default of \"\" means to use \"ftbackups3\" within the game instance folder.",
                     "Example valid paths:",
                     "- Linux/Mac: \"/home/user/mc-backups\"",
@@ -85,6 +86,7 @@ public interface FTBBackupsServerConfig {
             .comment("Advanced features that shouldn't be changed unless you know what you are doing.");
 
     ArchivalPluginValue ARCHIVAL_PLUGIN = CONFIG.add(new ArchivalPluginValue(CONFIG, "archival_plugin", ZipArchiver.ID))
+            .fromFileOnly()
             .comment("Method to use to create a backup archive.",
                     "Builtin methods are \"ftbbackups:zip\" (create a ZIP file) and \"ftbbackups:filecopy\" (simple recursive copy of files with no compression)",
                     "More archival plugins may be added by other mods.");
