@@ -9,6 +9,7 @@ import dev.ftb.mods.ftbbackups.config.FTBBackupsClientConfig;
 import dev.ftb.mods.ftbbackups.config.FTBBackupsServerConfig;
 import dev.ftb.mods.ftbbackups.net.FTBBackupsNetHandler;
 import dev.ftb.mods.ftbbackups.net.NotifyDisabledPacket;
+import dev.ftb.mods.ftbbackups.retention.RetentionRegistry;
 import dev.ftb.mods.ftblibrary.config.manager.ConfigManager;
 import net.minecraft.Util;
 import net.minecraft.network.chat.Component;
@@ -35,11 +36,14 @@ import org.slf4j.LoggerFactory;
 @Mod(FTBBackups.MOD_ID)
 public class FTBBackups {
     public static final String MOD_ID = "ftbbackups3";
+    private static final RetentionRegistry RETENTION_REGISTRY = new RetentionRegistry();
 
     public FTBBackups(IEventBus eventBus) {
         if (FMLEnvironment.dist == Dist.CLIENT) {
             eventBus.<FMLClientSetupEvent>addListener(event -> BackupsClient.onModConstruction());
         }
+
+        retentionRegistry().init();
         eventBus.addListener(this::registerNetwork);
         NeoForge.EVENT_BUS.addListener(EventPriority.HIGH, this::playerLoggedIn);
 
@@ -111,6 +115,10 @@ public class FTBBackups {
 
     public static boolean isDisabledByEnvironmentVar() {
         return System.getenv().containsKey("FTB_BACKUPS_DISABLED");
+    }
+
+    public static RetentionRegistry retentionRegistry() {
+        return RETENTION_REGISTRY;
     }
 
     public static ResourceLocation id(String path) {
